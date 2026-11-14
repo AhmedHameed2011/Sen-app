@@ -1,10 +1,17 @@
 # Sanad | سند - Determination Companion Web App
 > **Empowering students with determination inside school and in real life.**
 
+[![Live Demo](https://img.shields.io/badge/Production-Live%20on%20Vercel-success)](https://sanad-determination-app.vercel.app)
 [![WCAG 2.2 AAA](https://img.shields.io/badge/WCAG%202.2-AAA%20Compliant-success)](#)
 [![A11y Verified](https://img.shields.io/badge/Accessibility-Chrome%20DevTools%20Audited-blue)](#)
 [![Bilingual](https://img.shields.io/badge/Language-English%20%7C%20العربية-purple)](#)
 [![Offline Ready](https://img.shields.io/badge/PWA-100%25%20Offline-green)](#)
+
+---
+
+## 🌐 Live Production URL
+Access the live web app anywhere on tablet, phone, or desktop:
+👉 **[https://sanad-determination-app.vercel.app](https://sanad-determination-app.vercel.app)**
 
 ---
 
