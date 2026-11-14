@@ -111,9 +111,9 @@ const i18n = {
       section_father_details: "Father's Contact Details",
       section_mother_details: "Mother's Contact Details",
       label_father_name: "Father's Full Name:",
-      label_father_phone: "Father's Phone (Tap to Call):",
+      label_father_phone: "Father's Phone Number:",
       label_mother_name: "Mother's Full Name:",
-      label_mother_phone: "Mother's Phone (Tap to Call):",
+      label_mother_phone: "Mother's Phone Number:",
       
       // Auditor
       audit_title: "Chrome DevTools & WCAG 2.2 Live Auditor",
@@ -248,10 +248,10 @@ const i18n = {
       btn_call: "اتصال",
       section_father_details: "بيانات الأب (الاتصال)",
       section_mother_details: "بيانات الأم (الاتصال)",
-      label_father_name: "اسم الأب الكامل / الرباعي:",
-      label_father_phone: "رقم هاتف الأب (للاتصال المباشر):",
+      label_father_name: "اسم الأب الكامل:",
+      label_father_phone: "رقم هاتف الأب:",
       label_mother_name: "اسم الأم الكامل:",
-      label_mother_phone: "رقم هاتف الأم (للاتصال المباشر):",
+      label_mother_phone: "رقم هاتف الأم:",
       
       // Auditor
       audit_title: "مدقق سهولة الوصول ومعايير ديف تولز WCAG 2.2",

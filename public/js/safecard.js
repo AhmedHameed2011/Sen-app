@@ -80,10 +80,11 @@ const safecardModule = {
       fatherCardEl.setAttribute('aria-label', `${fatherRole}: ${fName}, ${callText}`);
       fatherCardEl.innerHTML = `
         <div class="contact-info-wrap">
-          <span class="contact-avatar-icon" aria-hidden="true">👨</span>
+          <div class="contact-avatar-icon" aria-hidden="true">👨</div>
           <div class="contact-details-text">
-            <span class="contact-relationship">${fatherRole}</span>
+            <span class="contact-role-badge">${fatherRole}</span>
             <span class="contact-person-name">${fName}</span>
+            <span class="contact-person-phone" dir="ltr">${fPhone}</span>
           </div>
         </div>
         <div class="contact-call-btn">
@@ -100,10 +101,11 @@ const safecardModule = {
       motherCardEl.setAttribute('aria-label', `${motherRole}: ${mName}, ${callText}`);
       motherCardEl.innerHTML = `
         <div class="contact-info-wrap">
-          <span class="contact-avatar-icon" aria-hidden="true">👩</span>
+          <div class="contact-avatar-icon" aria-hidden="true">👩</div>
           <div class="contact-details-text">
-            <span class="contact-relationship">${motherRole}</span>
+            <span class="contact-role-badge">${motherRole}</span>
             <span class="contact-person-name">${mName}</span>
+            <span class="contact-person-phone" dir="ltr">${mPhone}</span>
           </div>
         </div>
         <div class="contact-call-btn">

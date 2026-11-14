@@ -557,10 +557,11 @@
           <div class="safecard-contacts">
             <a href="tel:+971509876543" class="contact-pill" id="safecard-father-display">
               <div class="contact-info-wrap">
-                <span class="contact-avatar-icon" aria-hidden="true">👨</span>
+                <div class="contact-avatar-icon" aria-hidden="true">👨</div>
                 <div class="contact-details-text">
-                  <span class="contact-relationship" data-i18n="father_label">الأب</span>
+                  <span class="contact-role-badge" data-i18n="father_label">الأب</span>
                   <span class="contact-person-name">طارق المنصوري</span>
+                  <span class="contact-person-phone" dir="ltr">+971 50 987 6543</span>
                 </div>
               </div>
               <div class="contact-call-btn">
@@ -570,10 +571,11 @@
             </a>
             <a href="tel:+971501234567" class="contact-pill" id="safecard-mother-display">
               <div class="contact-info-wrap">
-                <span class="contact-avatar-icon" aria-hidden="true">👩</span>
+                <div class="contact-avatar-icon" aria-hidden="true">👩</div>
                 <div class="contact-details-text">
-                  <span class="contact-relationship" data-i18n="mother_label">الأم</span>
+                  <span class="contact-role-badge" data-i18n="mother_label">الأم</span>
                   <span class="contact-person-name">فاطمة الزهراء</span>
+                  <span class="contact-person-phone" dir="ltr">+971 50 123 4567</span>
                 </div>
               </div>
               <div class="contact-call-btn">
@@ -691,35 +693,35 @@
         </div>
 
         <!-- Father Contact Details -->
-        <div style="background: var(--bg-surface-hover); padding: 1.1rem; border-radius: var(--radius-md); border: 1.5px solid var(--border-subtle);">
-          <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-blue);">
-            <span aria-hidden="true">👨</span> <span data-i18n="section_father_details">Father's Contact Details</span>
+        <div class="modal-contact-section modal-contact-father">
+          <div class="modal-section-title">
+            <span aria-hidden="true">👨</span> <span data-i18n="section_father_details">بيانات الأب (الاتصال)</span>
           </div>
           <div class="form-row-2">
-            <div>
-              <label for="input-card-father-name" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_father_name">Father's Full Name:</label>
-              <input type="text" id="input-card-father-name" required placeholder="اسم الأب الكامل / Father's Name" style="width: 100%; min-height: 48px; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+            <div class="form-field-group">
+              <label for="input-card-father-name" data-i18n="label_father_name">اسم الأب الكامل:</label>
+              <input type="text" id="input-card-father-name" required placeholder="اسم الأب / Father's Name">
             </div>
-            <div>
-              <label for="input-card-father-phone" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_father_phone">Father's Phone Number:</label>
-              <input type="tel" id="input-card-father-phone" required placeholder="+97150..." style="width: 100%; min-height: 48px; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+            <div class="form-field-group">
+              <label for="input-card-father-phone" data-i18n="label_father_phone">رقم هاتف الأب:</label>
+              <input type="tel" id="input-card-father-phone" required class="phone-input-style" placeholder="+971 50 ...">
             </div>
           </div>
         </div>
 
         <!-- Mother Contact Details -->
-        <div style="background: var(--bg-surface-hover); padding: 1.1rem; border-radius: var(--radius-md); border: 1.5px solid var(--border-subtle);">
-          <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-purple);">
-            <span aria-hidden="true">👩</span> <span data-i18n="section_mother_details">Mother's Contact Details</span>
+        <div class="modal-contact-section modal-contact-mother">
+          <div class="modal-section-title">
+            <span aria-hidden="true">👩</span> <span data-i18n="section_mother_details">بيانات الأم (الاتصال)</span>
           </div>
           <div class="form-row-2">
-            <div>
-              <label for="input-card-mother-name" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_mother_name">Mother's Full Name:</label>
-              <input type="text" id="input-card-mother-name" required placeholder="اسم الأم الكامل / Mother's Name" style="width: 100%; min-height: 48px; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+            <div class="form-field-group">
+              <label for="input-card-mother-name" data-i18n="label_mother_name">اسم الأم الكامل:</label>
+              <input type="text" id="input-card-mother-name" required placeholder="اسم الأم / Mother's Name">
             </div>
-            <div>
-              <label for="input-card-mother-phone" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_mother_phone">Mother's Phone Number:</label>
-              <input type="tel" id="input-card-mother-phone" required placeholder="+97150..." style="width: 100%; min-height: 48px; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+            <div class="form-field-group">
+              <label for="input-card-mother-phone" data-i18n="label_mother_phone">رقم هاتف الأم:</label>
+              <input type="tel" id="input-card-mother-phone" required class="phone-input-style" placeholder="+971 50 ...">
             </div>
           </div>
         </div>
