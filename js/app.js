@@ -188,9 +188,31 @@ const app = {
   },
 
   registerServiceWorker() {
+    // Clear legacy client-side caches
+    if ('caches' in window) {
+      caches.keys().then(keys => {
+        keys.forEach(k => {
+          if (k !== 'sanad-v4-realtime') {
+            console.log('Purging legacy cache:', k);
+            caches.delete(k);
+          }
+        });
+      });
+    }
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => {
+      navigator.serviceWorker.register('sw.js?v=4').then(reg => {
+        reg.update(); // Trigger immediate background update check
+      }).catch(err => {
         // Safe to ignore in sandbox or file protocol
+      });
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
       });
     }
   }
