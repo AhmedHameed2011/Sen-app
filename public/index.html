@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanad | سند - Determination Companion</title>
+  <meta name="description" content="Empowering web companion for students with determination inside school and outside in real life. Accessible, inclusive, and WCAG AAA compliant.">
+  <meta name="theme-color" content="#0284c7">
+  
+  <!-- Web App Manifest for PWA & Offline Support -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-theme="default" data-dyslexic="false">
+
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="skip-link" data-i18n="skip_to_content">Skip to main content</a>
+
+  <!-- Live Announcer for Screen Readers -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="sr-alert" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Application Header -->
+  <header class="app-header" role="banner">
+    <div class="header-top">
+      <a href="#school" class="brand-wrapper" aria-label="Sanad Determination Companion Home">
+        <div class="brand-logo-icon" aria-hidden="true">س</div>
+        <div class="brand-text">
+          <h1>Sanad <span style="font-weight: 400; opacity: 0.85;">| سند</span></h1>
+          <p data-i18n="brand_subtitle">Determination Companion inside School & Real Life</p>
+        </div>
+      </a>
+
+      <!-- Quick Accessibility Toolbar -->
+      <aside class="a11y-quickbar" role="region" aria-label="Accessibility quick controls">
+        <!-- Font Size Adjusters -->
+        <button id="btn-font-dec" class="tool-btn" aria-label="Decrease text size" title="Smaller text">
+          <span aria-hidden="true">A-</span>
+        </button>
+        <button id="btn-font-inc" class="tool-btn" aria-label="Increase text size" title="Larger text">
+          <span aria-hidden="true">A+</span>
+        </button>
+
+        <!-- High Contrast Modes Menu -->
+        <select id="select-theme" class="tool-btn" aria-label="Color Contrast Theme" title="Color Contrast Mode">
+          <option value="default">🎨 Theme: Calm Modern</option>
+          <option value="contrast-dark">🌙 High Contrast Dark</option>
+          <option value="contrast-light">☀️ High Contrast Light</option>
+          <option value="yellow-black">⚡ Yellow on Black</option>
+          <option value="sensory-pastel">🌿 Sensory Pastel</option>
+        </select>
+
+        <!-- Dyslexia Font Toggle -->
+        <button id="btn-dyslexic-font" class="tool-btn" aria-pressed="false" aria-label="Toggle Dyslexia Friendly Font" title="Dyslexia Font">
+          <span aria-hidden="true">📖</span> <span data-i18n="font_dyslexic">Dyslexia Font</span>
+        </button>
+
+        <!-- Hover-to-Read Aloud Toggle -->
+        <button id="btn-hover-speech" class="tool-btn" aria-pressed="false" aria-label="Toggle Read aloud on hover/focus" title="Speak when focused">
+          <span aria-hidden="true">🔊</span> <span data-i18n="voice_reader">Voice Assist</span>
+        </button>
+
+        <!-- Language Switcher (EN / AR) -->
+        <button id="btn-lang-toggle" class="tool-btn" aria-label="Switch Language to Arabic" title="Change Language">
+          <span aria-hidden="true">🌐</span> <span id="lang-indicator">العربية</span>
+        </button>
+
+        <!-- Quick SOS / Safe Card Shortcut -->
+        <button id="btn-quick-sos" class="tool-btn btn-emergency" aria-label="Open Emergency Safe ID Card" title="Emergency Help Card">
+          <span aria-hidden="true">🆘</span> <span data-i18n="emergency_sos">SOS Help</span>
+        </button>
+      </aside>
+    </div>
+
+    <!-- Navigation Tabs (Touch targets >= 48px) -->
+    <nav class="app-nav" role="navigation" aria-label="Primary Application Navigation">
+      <ul class="nav-list" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a href="#school" id="tab-school" class="nav-link active" role="tab" aria-selected="true" aria-controls="section-school">
+            <span class="nav-icon" aria-hidden="true">🏫</span>
+            <span data-i18n="nav_school">In School</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="#life" id="tab-life" class="nav-link" role="tab" aria-selected="false" aria-controls="section-life">
+            <span class="nav-icon" aria-hidden="true">🌍</span>
+            <span data-i18n="nav_life">Real Life</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="#aac" id="tab-aac" class="nav-link" role="tab" aria-selected="false" aria-controls="section-aac">
+            <span class="nav-icon" aria-hidden="true">🗣️</span>
+            <span data-i18n="nav_aac">Talk & AAC</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="#calm" id="tab-calm" class="nav-link" role="tab" aria-selected="false" aria-controls="section-calm">
+            <span class="nav-icon" aria-hidden="true">🧘</span>
+            <span data-i18n="nav_calm">Calm Zone</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="#safe" id="tab-safe" class="nav-link" role="tab" aria-selected="false" aria-controls="section-safe">
+            <span class="nav-icon" aria-hidden="true">🪪</span>
+            <span data-i18n="nav_safe">Safe ID Card</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a href="#audit" id="tab-audit" class="nav-link" role="tab" aria-selected="false" aria-controls="section-audit">
+            <span class="nav-icon" aria-hidden="true">🔍</span>
+            <span data-i18n="nav_audit">A11y Auditor</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="main-content" class="main-content" role="main" tabindex="-1">
+
+    <!-- ====================================================================
+         SECTION 1: IN SCHOOL (INSIDE SCHOOL COMPANION)
+         ==================================================================== -->
+    <section id="section-school" class="app-section active" role="tabpanel" aria-labelledby="tab-school">
+      
+      <!-- Hero Banner -->
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🏫</span> <span data-i18n="school_title">School Companion</span></h2>
+          <p data-i18n="school_subtitle">Your daily classroom schedule, discreet teacher cards, step-by-step homework chunker, and speech reader.</p>
+        </div>
+        <div class="hero-actions">
+          <button id="btn-add-period" class="tool-btn" aria-label="Add custom class period">
+            <span aria-hidden="true">➕</span> <span data-i18n="add_period_btn">Add Class</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Classroom Help Cards (Discreet Communication) -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span aria-hidden="true">🙋</span> <span data-i18n="discreet_cards_title">Discreet Teacher Cards</span>
+          </h3>
+          <span style="font-size: 0.9rem; color: var(--text-muted);" data-i18n="discreet_cards_hint">Tap to speak or show full-screen to teacher</span>
+        </div>
+        <div class="discreet-cards-grid" id="discreet-cards-container">
+          <!-- Dynamically populated & interactive -->
+        </div>
+      </div>
+
+      <!-- Grid for Timetable & Task Chunking -->
+      <div class="grid-2">
+        <!-- Visual Timetable -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">📅</span> <span data-i18n="timetable_title">Today's Visual Schedule</span>
+            </h3>
+            <span id="current-time-badge" class="tool-btn" style="cursor: default;" aria-label="Current School Time">08:30 AM</span>
+          </div>
+          <div id="timetable-list" class="timetable-list" role="list">
+            <!-- Dynamic timetable items -->
+          </div>
+        </div>
+
+        <!-- Task & Homework Chunking -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">🧩</span> <span data-i18n="chunking_title">Task Chunking (Step-by-Step)</span>
+            </h3>
+            <button id="btn-reset-tasks" class="tool-btn" style="font-size: 0.85rem;" data-i18n="reset_tasks">Reset</button>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.75rem;" data-i18n="chunking_desc">
+            Big assignments are easier when done in small pieces. Check off each step!
+          </p>
+          <div style="background: var(--bg-surface-hover); height: 12px; border-radius: var(--radius-full); overflow: hidden; margin-bottom: 1rem; border: 1px solid var(--border-subtle);">
+            <div id="chunk-progress-bar" style="width: 25%; height: 100%; background: var(--accent-green); transition: width 0.3s ease;"></div>
+          </div>
+          <ul id="chunk-tasks-list" class="chunk-task-list">
+            <!-- Task items with checkboxes -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Smart Reading & Voice Dictation Pad -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span aria-hidden="true">📖</span> <span data-i18n="reader_title">Smart Reader & Voice Dictation Pad</span>
+          </h3>
+          <span style="font-size: 0.9rem; color: var(--text-muted);" data-i18n="reader_hint">Reads aloud with word tracking, or speech-to-text dictation</span>
+        </div>
+        <div class="reader-box">
+          <label for="reader-textarea" class="sr-only" data-i18n="reader_label">Text for reading aloud or dictation</label>
+          <textarea id="reader-textarea" placeholder="Paste assignment text here to have it read aloud, or tap 'Start Dictation' to write with your voice..."></textarea>
+          
+          <div class="reader-controls">
+            <button id="btn-tts-play" class="tool-btn" style="background: var(--accent-blue); color: #fff;">
+              <span aria-hidden="true">▶️</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
+            </button>
+            <button id="btn-tts-stop" class="tool-btn">
+              <span aria-hidden="true">⏹️</span> <span data-i18n="btn_stop_reading">Stop</span>
+            </button>
+            <button id="btn-stt-record" class="tool-btn" style="background: var(--accent-purple); color: #fff;">
+              <span aria-hidden="true">🎙️</span> <span data-i18n="btn_dictate">Voice Dictate</span>
+            </button>
+            <button id="btn-clear-text" class="tool-btn">
+              <span aria-hidden="true">🗑️</span> <span data-i18n="btn_clear_text">Clear</span>
+            </button>
+            <label style="font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; margin-left: auto;">
+              <span data-i18n="speed_label">Speed:</span>
+              <select id="select-speech-rate" class="tool-btn" style="padding: 0.3rem 0.6rem; min-height: 38px;">
+                <option value="0.75">0.75x (Slower)</option>
+                <option value="1" selected>1.0x (Normal)</option>
+                <option value="1.25">1.25x (Faster)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: REAL LIFE (OUTSIDE IN REAL LIFE & INDEPENDENCE)
+         ==================================================================== -->
+    <section id="section-life" class="app-section" role="tabpanel" aria-labelledby="tab-life">
+      
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🌍</span> <span data-i18n="life_title">Real Life & Community Skills</span></h2>
+          <p data-i18n="life_subtitle">Practical social stories, interactive shopping & money calculator, and independent living routines.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Social Stories & Life Guides -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span aria-hidden="true">🗺️</span> <span data-i18n="social_stories_title">Interactive Life Guides & Social Stories</span>
+          </h3>
+          <div class="aac-categories-tabs" id="story-selector-tabs" style="margin-bottom: 0;">
+            <!-- Tabs for 5 social situations -->
+          </div>
+        </div>
+        <div id="active-story-display" class="social-story-card">
+          <!-- Active social story content populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Grid for Money Calculator and Daily Living Checklist -->
+      <div class="grid-2">
+        <!-- Visual Money Helper -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">💵</span> <span data-i18n="money_title">Visual Money Helper</span>
+            </h3>
+            <button id="btn-money-reset" class="tool-btn" style="font-size: 0.85rem;" data-i18n="reset_money">Reset</button>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem;" data-i18n="money_desc">
+            Calculate your money: enter item price, tap the coins & bills you have, and see if you can buy it!
+          </p>
+          <div class="money-calculator">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <label for="input-item-price" style="font-weight: 700;" data-i18n="price_label">Item Price:</label>
+              <input type="number" id="input-item-price" step="0.5" min="0" value="10" style="padding: 0.6rem 1rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1.2rem; font-weight: 800; width: 120px;" aria-label="Item Price">
+              <span style="font-weight: 800; font-size: 1.1rem;" id="currency-label">$ / AED</span>
+            </div>
+
+            <div class="money-display">
+              <div>
+                <div style="font-size: 0.9rem; color: var(--text-muted);" data-i18n="money_you_have">You Have In Hand:</div>
+                <div class="money-sum" id="money-total-display">$0.00</div>
+              </div>
+              <div id="money-status-badge" style="padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 800; background: var(--bg-surface); border: 2px solid var(--border-subtle);">
+                Need more
+              </div>
+            </div>
+
+            <div style="font-weight: 700; font-size: 0.95rem;" data-i18n="tap_to_add_money">Tap bills & coins to add:</div>
+            <div class="money-buttons-grid">
+              <button class="money-btn" data-val="1">💵 +$1</button>
+              <button class="money-btn" data-val="5">💵 +$5</button>
+              <button class="money-btn" data-val="10">💵 +$10</button>
+              <button class="money-btn" data-val="20">💵 +$20</button>
+              <button class="money-btn" data-val="0.25">🪙 +25¢</button>
+              <button class="money-btn" data-val="0.50">🪙 +50¢</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Independence Routines & Hydration -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">💧</span> <span data-i18n="hydration_title">Daily Hydration & Wellbeing</span>
+            </h3>
+            <span id="water-count-badge" style="font-weight: 800; color: var(--accent-blue);">0 / 8 Glasses</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem;" data-i18n="hydration_desc">
+            Drinking water keeps your brain sharp and helps you stay calm. Tap to drink a glass!
+          </p>
+          <div id="water-glasses-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
+            <!-- 8 interactive water cups -->
+          </div>
+
+          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;" data-i18n="backpack_routine_title">🎒 Evening Backpack Checklist</h4>
+          <ul id="backpack-routine-list" class="chunk-task-list">
+            <!-- Backpack prep items -->
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: AAC (AUGMENTATIVE & ALTERNATIVE COMMUNICATION) BOARD
+         ==================================================================== -->
+    <section id="section-aac" class="app-section" role="tabpanel" aria-labelledby="tab-aac">
+      
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🗣️</span> <span data-i18n="aac_title">Talk & AAC Communication Board</span></h2>
+          <p data-i18n="aac_subtitle">Express your thoughts, needs, and feelings with tap-to-speak symbols or build complete sentences.</p>
+        </div>
+        <div>
+          <button id="btn-custom-tile" class="tool-btn" aria-label="Create custom communication symbol">
+            <span aria-hidden="true">➕</span> <span data-i18n="add_custom_tile">Add Custom Tile</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sticky Sentence Strip Builder -->
+      <div class="aac-sentence-strip" role="region" aria-label="Sentence Builder Strip">
+        <div id="aac-tiles-stream" class="aac-tiles-stream" aria-live="polite">
+          <span id="aac-empty-placeholder" style="color: var(--text-muted); font-style: italic; font-size: 1.05rem;" data-i18n="sentence_empty_hint">
+            Tap cards below to build your sentence...
+          </span>
+        </div>
+        <div class="aac-actions">
+          <button id="btn-aac-backspace" class="tool-btn" aria-label="Delete last word" title="Backspace">
+            <span aria-hidden="true">⌫</span>
+          </button>
+          <button id="btn-aac-clear" class="tool-btn" aria-label="Clear sentence" title="Clear All">
+            <span aria-hidden="true">🗑️</span>
+          </button>
+          <button id="btn-aac-speak-sentence" class="btn-speak-sentence" aria-label="Speak the entire sentence">
+            <span aria-hidden="true">🗣️</span> <span data-i18n="btn_speak_all">Speak</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories Filter Tabs -->
+      <div class="aac-categories-tabs" role="tablist" aria-label="Symbol Categories">
+        <button class="aac-cat-btn active" data-cat="all" role="tab" aria-selected="true" data-i18n="cat_all">All Symbols</button>
+        <button class="aac-cat-btn" data-cat="urgent" role="tab" aria-selected="false" data-i18n="cat_urgent">🚨 Urgent</button>
+        <button class="aac-cat-btn" data-cat="needs" role="tab" aria-selected="false" data-i18n="cat_needs">🥤 Needs</button>
+        <button class="aac-cat-btn" data-cat="feelings" role="tab" aria-selected="false" data-i18n="cat_feelings">😊 Feelings</button>
+        <button class="aac-cat-btn" data-cat="social" role="tab" aria-selected="false" data-i18n="cat_social">👋 Social</button>
+        <button class="aac-cat-btn" data-cat="actions" role="tab" aria-selected="false" data-i18n="cat_actions">🏃 Actions</button>
+      </div>
+
+      <!-- Symbol Grid (Touch target min 120x120px) -->
+      <div id="aac-grid-container" class="aac-grid" role="grid" aria-label="Communication Cards">
+        <!-- AAC Tiles populated dynamically with high contrast & audio cues -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4: CALM SENSORY SANCTUARY (DECOMPRESSION ZONE)
+         ==================================================================== -->
+    <section id="section-calm" class="app-section" role="tabpanel" aria-labelledby="tab-calm">
+      
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🧘</span> <span data-i18n="calm_title">Sensory Calm Sanctuary</span></h2>
+          <p data-i18n="calm_subtitle">Reset your nervous system with guided visual breathing, soothing procedural soundscapes, and the Zones of Regulation.</p>
+        </div>
+      </div>
+
+      <div class="calm-container">
+        <!-- Visual Breathing Bubble -->
+        <div class="breathing-box">
+          <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 1.5rem;" data-i18n="breathing_title">🌬️ Guided Rhythm Breathing</h3>
+          
+          <div class="breathing-circle-outer">
+            <div id="breathing-circle-inner" class="breathing-circle-inner">
+              <span id="breathing-instruction" class="breathing-text">Inhale</span>
+              <span id="breathing-countdown" class="breathing-timer">4</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 2rem; display: flex; gap: 0.75rem; align-items: center;">
+            <button id="btn-toggle-breathing" class="tool-btn" style="background: var(--accent-blue); color: #fff; min-height: 48px; padding: 0.5rem 1.5rem;">
+              <span id="breathing-btn-icon" aria-hidden="true">⏸️</span> <span id="breathing-btn-text" data-i18n="pause_breathing">Pause</span>
+            </button>
+            <select id="select-breathing-pattern" class="tool-btn" aria-label="Select breathing rhythm">
+              <option value="box">Box Breathing (4-4-4-4)</option>
+              <option value="calm">4-7-8 Deep Sleep/Relax</option>
+              <option value="gentle">Gentle Flow (3-3)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ambient Noise & Sound Masking Synthesizers -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">🎧</span> <span data-i18n="sounds_title">Procedural Sound Generator</span>
+            </h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="sounds_hint">100% Offline Web Audio</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.25rem;" data-i18n="sounds_desc">
+            Mask harsh school hallway noises or outside traffic. Adjust volumes to create your perfect sensory cushion.
+          </p>
+
+          <!-- Brown Noise (Best for ADHD & Sensory Overload) -->
+          <div class="sound-track">
+            <div class="sound-info">
+              <span aria-hidden="true">🤎</span>
+              <span data-i18n="sound_brown">Brown Noise</span>
+            </div>
+            <label for="slider-brown" class="sr-only">Brown Noise Volume</label>
+            <input type="range" id="slider-brown" class="sound-slider" min="0" max="1" step="0.05" value="0">
+            <span id="label-vol-brown" style="font-size: 0.85rem; font-weight: 700; width: 40px; text-align: right;">0%</span>
+          </div>
+
+          <!-- Gentle Rain -->
+          <div class="sound-track">
+            <div class="sound-info">
+              <span aria-hidden="true">🌧️</span>
+              <span data-i18n="sound_rain">Gentle Rain</span>
+            </div>
+            <label for="slider-rain" class="sr-only">Gentle Rain Volume</label>
+            <input type="range" id="slider-rain" class="sound-slider" min="0" max="1" step="0.05" value="0">
+            <span id="label-vol-rain" style="font-size: 0.85rem; font-weight: 700; width: 40px; text-align: right;">0%</span>
+          </div>
+
+          <!-- Ocean Waves -->
+          <div class="sound-track">
+            <div class="sound-info">
+              <span aria-hidden="true">🌊</span>
+              <span data-i18n="sound_ocean">Ocean Waves</span>
+            </div>
+            <label for="slider-ocean" class="sr-only">Ocean Waves Volume</label>
+            <input type="range" id="slider-ocean" class="sound-slider" min="0" max="1" step="0.05" value="0">
+            <span id="label-vol-ocean" style="font-size: 0.85rem; font-weight: 700; width: 40px; text-align: right;">0%</span>
+          </div>
+
+          <!-- Zen Chimes Tone -->
+          <div class="sound-track">
+            <div class="sound-info">
+              <span aria-hidden="true">🔔</span>
+              <span data-i18n="sound_bowl">Zen Chime</span>
+            </div>
+            <button id="btn-play-chime" class="tool-btn" style="min-height: 40px; padding: 0.3rem 0.8rem;" data-i18n="btn_ring_chime">Ring Once</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emotional Check-in: Zones of Regulation -->
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span aria-hidden="true">🚦</span> <span data-i18n="zones_title">How Are You Feeling Right Now? (Zones of Regulation)</span>
+          </h3>
+          <span style="font-size: 0.9rem; color: var(--text-muted);" data-i18n="zones_hint">Tap your zone to see helpful tools</span>
+        </div>
+        <div class="zones-grid">
+          <!-- Blue Zone -->
+          <div class="zone-card zone-blue" tabindex="0" role="button" data-zone="blue" aria-label="Blue Zone: Sad, Tired, Sick or Slow">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;" aria-hidden="true">🔵 😴</div>
+            <h4 style="font-weight: 800; font-size: 1.15rem; margin-bottom: 0.3rem;" data-i18n="zone_blue_title">Blue Zone</h4>
+            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;" data-i18n="zone_blue_desc">Sad, Tired, Sick, Slow moving</p>
+            <div style="font-weight: 700; font-size: 0.85rem;" data-i18n="zone_blue_action">👉 Stretch & Sip Water</div>
+          </div>
+
+          <!-- Green Zone -->
+          <div class="zone-card zone-green" tabindex="0" role="button" data-zone="green" aria-label="Green Zone: Happy, Calm, Focused, Ready to Learn">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;" aria-hidden="true">🟢 😊</div>
+            <h4 style="font-weight: 800; font-size: 1.15rem; margin-bottom: 0.3rem;" data-i18n="zone_green_title">Green Zone</h4>
+            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;" data-i18n="zone_green_desc">Calm, Happy, Focused, Ready to learn</p>
+            <div style="font-weight: 700; font-size: 0.85rem;" data-i18n="zone_green_action">👉 You are doing awesome!</div>
+          </div>
+
+          <!-- Yellow Zone -->
+          <div class="zone-card zone-yellow" tabindex="0" role="button" data-zone="yellow" aria-label="Yellow Zone: Frustrated, Worried, Silly, Wiggly">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;" aria-hidden="true">🟡 😬</div>
+            <h4 style="font-weight: 800; font-size: 1.15rem; margin-bottom: 0.3rem;" data-i18n="zone_yellow_title">Yellow Zone</h4>
+            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;" data-i18n="zone_yellow_desc">Frustrated, Worried, Silly, Excited</p>
+            <div style="font-weight: 700; font-size: 0.85rem;" data-i18n="zone_yellow_action">👉 5-4-3-2-1 Grounding Break</div>
+          </div>
+
+          <!-- Red Zone -->
+          <div class="zone-card zone-red" tabindex="0" role="button" data-zone="red" aria-label="Red Zone: Mad, Terrified, Yelling, Out of Control">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;" aria-hidden="true">🔴 🛑</div>
+            <h4 style="font-weight: 800; font-size: 1.15rem; margin-bottom: 0.3rem;" data-i18n="zone_red_title">Red Zone</h4>
+            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;" data-i18n="zone_red_desc">Overwhelmed, Very Angry, Out of control</p>
+            <div style="font-weight: 700; font-size: 0.85rem;" data-i18n="zone_red_action">👉 Stop & Seek Safe Adult</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 5: SAFE PASSAGE / PERSONAL EMERGENCY CARD
+         ==================================================================== -->
+    <section id="section-safe" class="app-section" role="tabpanel" aria-labelledby="tab-safe">
+      
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🪪</span> <span data-i18n="safe_title">Safe Passage & Personal ID Card</span></h2>
+          <p data-i18n="safe_subtitle">High-visibility identification card for non-verbal or stressful moments. Show directly to teachers, bus drivers, or helpers.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="btn-edit-safecard" class="tool-btn" aria-label="Edit student profile details">
+            <span aria-hidden="true">✏️</span> <span data-i18n="btn_edit_card">Edit Card</span>
+          </button>
+          <button id="btn-present-safecard" class="tool-btn" style="background: var(--accent-blue); color: #fff;" aria-label="Present full screen to helper">
+            <span aria-hidden="true">🖥️</span> <span data-i18n="btn_present_fullscreen">Show Fullscreen</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="safecard-container" id="safecard-main-view">
+        <div class="safecard-header">
+          <div class="safecard-avatar" aria-hidden="true" id="safecard-avatar-display">🌟</div>
+          <div class="safecard-name-group">
+            <h3 id="safecard-name-display">Zaid Al-Mansouri</h3>
+            <p id="safecard-school-display">Al Noor Academy | Grade 5</p>
+            <span class="safecard-badge-urgent" data-i18n="badge_student_determination">Student of Determination</span>
+          </div>
+        </div>
+
+        <div class="safecard-section">
+          <h4 data-i18n="how_to_help_me_title">🤝 How to Communicate & Help Me:</h4>
+          <div class="safecard-info-box" id="safecard-help-display">
+            • I communicate best using visual cards or short, gentle sentences.<br>
+            • Loud noises or sudden crowds may overwhelm me. Please give me 2 minutes in a quiet space.<br>
+            • If I am separated or lost, please assist me in contacting my parents below immediately.
+          </div>
+        </div>
+
+        <div class="safecard-section">
+          <h4 data-i18n="medical_notes_title">📋 Medical / Sensory Notes:</h4>
+          <div class="safecard-info-box" id="safecard-medical-display">
+            Allergies: Peanuts. Uses noise-canceling headphones in loud environments.
+          </div>
+        </div>
+
+        <div class="safecard-section">
+          <h4 data-i18n="emergency_contacts_title">📞 Emergency Contacts (Tap to Call):</h4>
+          <div class="safecard-contacts">
+            <a href="tel:+971501234567" class="contact-pill" id="safecard-phone1-display">
+              <span>👩 Mother: Fatima</span>
+              <span aria-hidden="true">📞 Call</span>
+            </a>
+            <a href="tel:+971509876543" class="contact-pill" id="safecard-phone2-display">
+              <span>👨 Father: Tariq</span>
+              <span aria-hidden="true">📞 Call</span>
+            </a>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
+          <button id="btn-loud-chime" class="tool-btn btn-emergency" style="min-height: 54px; font-size: 1.15rem; padding: 0.75rem 2rem;">
+            <span aria-hidden="true">📢</span> <span data-i18n="btn_sound_alert">Sound Assistance Chime</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 6: CHROME DEVTOOLS & WCAG 2.2 ACCESSIBILITY AUDITOR
+         ==================================================================== -->
+    <section id="section-audit" class="app-section" role="tabpanel" aria-labelledby="tab-audit">
+      
+      <div class="section-hero">
+        <div class="hero-text">
+          <h2><span aria-hidden="true">🔍</span> <span data-i18n="audit_title">Chrome DevTools & WCAG 2.2 Live Auditor</span></h2>
+          <p data-i18n="audit_subtitle">Integrated accessibility engine that validates contrast ratios, tap targets (48x48px), heading structures, and ARIA landmarks live on this page.</p>
+        </div>
+        <div>
+          <button id="btn-run-audit" class="tool-btn" style="background: var(--accent-green); color: #fff; min-height: 48px; font-weight: 800;">
+            <span aria-hidden="true">⚡</span> <span data-i18n="btn_run_audit">Run Full Audit</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="auditor-dashboard">
+        <!-- Metric Summary Cards -->
+        <div class="audit-metrics-bar">
+          <div class="metric-card">
+            <div class="metric-score pass" id="audit-score-gauge">100%</div>
+            <div class="metric-label" data-i18n="audit_overall_score">WCAG Compliance Score</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-score pass" id="audit-taptargets-count">0 Violations</div>
+            <div class="metric-label" data-i18n="audit_tap_target">Tap Targets (≥48px)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-score pass" id="audit-contrast-count">100% Pass</div>
+            <div class="metric-label" data-i18n="audit_contrast">Color Contrast (AAA)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-score pass" id="audit-aria-count">0 Missing</div>
+            <div class="metric-label" data-i18n="audit_aria_labels">Labels & ARIA Names</div>
+          </div>
+        </div>
+
+        <!-- DevTools Audit Details Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span aria-hidden="true">📋</span> <span data-i18n="audit_checklist_title">DevTools Verification Checklist</span>
+            </h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="audit_updated_just_now">Tested Live in DOM</span>
+          </div>
+
+          <div class="audit-results-list" id="audit-results-list">
+            <!-- Dynamically populated checklist items -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       ACCESSIBLE MODALS / DIALOGS
+       ==================================================================== -->
+
+  <!-- 1. Fullscreen Presentation Modal (for Teacher or Helper) -->
+  <div id="modal-presentation" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pres-title" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="btn-close-presentation" aria-label="Close presentation overlay">✕</button>
+      <div class="presentation-card">
+        <div id="pres-icon" class="presentation-icon" aria-hidden="true">🙋</div>
+        <div id="pres-title" class="presentation-text">I need a 3-minute sensory break</div>
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+          <button id="btn-pres-speak" class="tool-btn" style="background: var(--accent-blue); color: #fff; font-size: 1.1rem; padding: 0.75rem 1.5rem;">
+            <span aria-hidden="true">🔊</span> <span data-i18n="btn_speak_again">Speak Out Loud</span>
+          </button>
+          <button id="btn-pres-done" class="tool-btn" style="background: var(--accent-green); color: #fff; font-size: 1.1rem; padding: 0.75rem 1.5rem;">
+            <span aria-hidden="true">✅</span> <span data-i18n="btn_understood">Understood / Thank You</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Edit Safe Card Profile Modal -->
+  <div id="modal-edit-safecard" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-card-title" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="btn-close-safecard-modal" aria-label="Close edit profile dialog">✕</button>
+      <h3 id="edit-card-title" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.25rem;">
+        ✏️ <span data-i18n="modal_edit_card_title">Edit Safe ID Card</span>
+      </h3>
+      <form id="form-edit-safecard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label for="input-card-name" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_student_name">Student Name:</label>
+          <input type="text" id="input-card-name" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+        </div>
+        <div>
+          <label for="input-card-school" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_school_grade">School & Grade:</label>
+          <input type="text" id="input-card-school" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+        </div>
+        <div>
+          <label for="input-card-help" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_how_to_help">How to Help & Communicate:</label>
+          <textarea id="input-card-help" rows="3" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem; font-family: inherit;"></textarea>
+        </div>
+        <div>
+          <label for="input-card-medical" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_medical_notes">Medical / Allergy Notes:</label>
+          <input type="text" id="input-card-medical" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label for="input-card-contact1" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_contact1">Contact 1 (Phone):</label>
+            <input type="tel" id="input-card-contact1" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+          </div>
+          <div>
+            <label for="input-card-contact2" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_contact2">Contact 2 (Phone):</label>
+            <input type="tel" id="input-card-contact2" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+          </div>
+        </div>
+        <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="tool-btn" id="btn-cancel-safecard" data-i18n="btn_cancel">Cancel</button>
+          <button type="submit" class="tool-btn" style="background: var(--accent-green); color: #fff; font-weight: 800;" data-i18n="btn_save">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Add Custom AAC Tile Modal -->
+  <div id="modal-custom-aac" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="custom-aac-title" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="btn-close-aac-modal" aria-label="Close add tile dialog">✕</button>
+      <h3 id="custom-aac-title" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 1.25rem;">
+        ➕ <span data-i18n="modal_add_tile_title">Add Custom Communication Tile</span>
+      </h3>
+      <form id="form-custom-aac" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label for="input-tile-emoji" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_icon_emoji">Icon or Emoji:</label>
+          <input type="text" id="input-tile-emoji" value="✨" maxlength="4" style="width: 80px; text-align: center; font-size: 1.8rem; padding: 0.5rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle);">
+        </div>
+        <div>
+          <label for="input-tile-text" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_tile_phrase">Tile Phrase (Spoken Text):</label>
+          <input type="text" id="input-tile-text" required placeholder="e.g. Can I draw a picture?" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+        </div>
+        <div>
+          <label for="select-tile-cat" style="font-weight: 700; display: block; margin-bottom: 0.3rem;" data-i18n="label_tile_category">Category:</label>
+          <select id="select-tile-cat" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem;">
+            <option value="needs">Needs & Comfort</option>
+            <option value="urgent">Urgent</option>
+            <option value="feelings">Feelings</option>
+            <option value="social">Social</option>
+            <option value="actions">Actions</option>
+          </select>
+        </div>
+        <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="tool-btn" id="btn-cancel-aac" data-i18n="btn_cancel">Cancel</button>
+          <button type="submit" class="tool-btn" style="background: var(--accent-purple); color: #fff; font-weight: 800;" data-i18n="btn_create_tile">Add Tile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/i18n.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/school.js"></script>
+  <script src="js/life.js"></script>
+  <script src="js/aac.js"></script>
+  <script src="js/calm.js"></script>
+  <script src="js/safecard.js"></script>
+  <script src="js/auditor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

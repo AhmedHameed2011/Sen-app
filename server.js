@@ -3,7 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3300;
-const PUBLIC_DIR = __dirname;
+const PUBLIC_DIR = fs.existsSync(path.join(__dirname, 'public')) 
+  ? path.join(__dirname, 'public') 
+  : __dirname;
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

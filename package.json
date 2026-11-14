@@ -2,10 +2,8 @@
   "name": "sanad-determination-companion",
   "version": "1.0.0",
   "description": "Empowering web application for students with determination inside school and outside in real life",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "keywords": [
     "accessibility",
