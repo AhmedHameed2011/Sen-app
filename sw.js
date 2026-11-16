@@ -1,11 +1,12 @@
-const CACHE_NAME = 'sanad-v4-realtime';
+const CACHE_NAME = 'sanad-v5-realtime';
 
-const ASSETS_TO_PRECACHE = [
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './css/styles.css',
   './js/i18n.js',
+  './js/privacy.js',
   './js/speech.js',
   './js/school.js',
   './js/life.js',
@@ -13,7 +14,11 @@ const ASSETS_TO_PRECACHE = [
   './js/calm.js',
   './js/safecard.js',
   './js/auditor.js',
-  './js/app.js'
+  './js/app.js',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png'
 ];
 
 self.addEventListener('install', (e) => {

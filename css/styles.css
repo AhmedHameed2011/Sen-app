@@ -1,6 +1,7 @@
 /* ==========================================================================
    SANAD - DETERMINATION COMPANION
-   WCAG 2.2 AA/AAA Compliant Stylesheet
+   WCAG 2.2 AA Compliant + AAA contrast modes
+   Week 1 a11y patch applied
    ========================================================================== */
 
 :root {
@@ -9,35 +10,40 @@
   --bg-surface: #ffffff;
   --bg-surface-hover: #f1f5f9;
   --bg-surface-active: #e2e8f0;
-  
+
   --text-primary: #0f172a;
   --text-secondary: #334155;
   --text-muted: #64748b;
   --text-inverse: #ffffff;
-  
-  --accent-blue: #0284c7;
-  --accent-blue-hover: #0369a1;
+
+  /* Text-safe accents (AA on white; darker hover hits AAA) */
+  --accent-blue: #0369a1;
+  --accent-blue-hover: #075985;
   --accent-blue-light: #e0f2fe;
-  
-  --accent-green: #16a34a;
+
+  --accent-green: #15803d;
+  --accent-green-hover: #166534;
   --accent-green-light: #dcfce7;
-  
+
   --accent-purple: #7c3aed;
   --accent-purple-light: #f3e8ff;
-  
+
   --accent-amber: #d97706;
   --accent-amber-light: #fef3c7;
-  
+
   --accent-rose: #e11d48;
   --accent-rose-light: #ffe4e6;
-  
+
+  /* Decorative-only brand blue (do not use for text) */
+  --brand-blue-decorative: #0284c7;
+
   --border-subtle: #cbd5e1;
-  --border-focus: #0284c7;
-  
+  --border-focus: #075985;
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
+
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -49,14 +55,14 @@
   --font-family-dyslexic: "Comic Sans MS", "Chalkboard SE", "OpenDyslexic", "Trebuchet MS", sans-serif;
   --line-height: 1.6;
   --letter-spacing: 0.02em;
-  
+
   /* Tap target minimum 48px */
   --min-tap-target: 48px;
   --focus-ring-width: 4px;
 }
 
 /* ==========================================================================
-   THEMES: High Contrast Dark, High Contrast Light, Yellow/Black, Sensory Pastel
+   THEMES
    ========================================================================== */
 
 /* 1. High Contrast Dark (OLED Black) */
@@ -73,6 +79,7 @@
   --accent-blue-hover: #7dd3fc;
   --accent-blue-light: #082f49;
   --accent-green: #4ade80;
+  --accent-green-hover: #86efac;
   --accent-green-light: #052e16;
   --accent-purple: #c084fc;
   --accent-purple-light: #3b0764;
@@ -85,7 +92,7 @@
   --shadow-md: 0 0 0 2px #475569;
 }
 
-/* 2. High Contrast Light (Black & White maximum contrast >= 21:1) */
+/* 2. High Contrast Light (Black & White maximum contrast) */
 [data-theme="contrast-light"] {
   --bg-primary: #ffffff;
   --bg-surface: #ffffff;
@@ -99,6 +106,7 @@
   --accent-blue-hover: #002c52;
   --accent-blue-light: #e0f2fe;
   --accent-green: #0a5c2b;
+  --accent-green-hover: #063d1c;
   --accent-green-light: #dcfce7;
   --accent-purple: #4a154b;
   --accent-purple-light: #f3e8ff;
@@ -125,6 +133,7 @@
   --accent-blue-hover: #ffffff;
   --accent-blue-light: #333300;
   --accent-green: #00ff00;
+  --accent-green-hover: #66ff66;
   --accent-green-light: #003300;
   --accent-purple: #ffff00;
   --accent-purple-light: #333300;
@@ -151,6 +160,7 @@
   --accent-blue-hover: #36607d;
   --accent-blue-light: #e4edf4;
   --accent-green: #4e8766;
+  --accent-green-hover: #3b6b50;
   --accent-green-light: #e3eee7;
   --accent-purple: #746399;
   --accent-purple-light: #ece8f4;
@@ -197,14 +207,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Focus visibility for keyboard users */
 :focus-visible {
   outline: var(--focus-ring-width) solid var(--border-focus);
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
 
-/* Skip link for keyboard users */
 .skip-link {
   position: absolute;
   top: -100px;
@@ -223,14 +231,26 @@ body {
   top: 1rem;
 }
 
-/* Reduced Motion respect */
+/* Reduced Motion respect (Week 1 patch: targeted, not nuclear) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  .app-section,
+  .discreet-btn,
+  .aac-tile,
+  .zone-card,
+  .tool-btn,
+  .contact-pill,
+  .contact-call-btn {
     animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
   }
+  html { scroll-behavior: auto !important; }
+
+  .breathing-circle-inner {
+    transition: opacity 1s ease !important;
+    transform: none !important;
+  }
+  .breathing-circle-inner[data-phase="inhale"] { opacity: 0.85; }
+  .breathing-circle-inner[data-phase="exhale"] { opacity: 1; }
 }
 
 /* ==========================================================================
@@ -289,7 +309,6 @@ body {
   font-weight: 500;
 }
 
-/* Quick A11y Controls in Header */
 .a11y-quickbar {
   display: flex;
   align-items: center;
@@ -321,7 +340,7 @@ body {
 
 .tool-btn[aria-pressed="true"] {
   background-color: var(--accent-blue);
-  color: var(--text-inverse);
+  color: #ffffff;
   border-color: var(--accent-blue);
 }
 
@@ -337,7 +356,7 @@ body {
 }
 
 /* ==========================================================================
-   PRIMARY NAVIGATION (LARGE TABS WITH HIGH-AFFORDANCE TOUCH TARGETS)
+   PRIMARY NAVIGATION
    ========================================================================== */
 
 .app-nav {
@@ -389,7 +408,7 @@ body {
 
 .nav-link.active {
   background-color: var(--accent-blue-light);
-  color: var(--accent-blue);
+  color: var(--accent-blue-hover);
   border-color: var(--accent-blue);
 }
 
@@ -397,6 +416,12 @@ body {
   background-color: var(--bg-surface-active);
   color: var(--accent-blue);
   border-color: var(--accent-blue);
+}
+
+[data-theme="contrast-light"] .nav-link.active {
+  color: #000000;
+  background-color: #e0f2fe;
+  border-color: #000000;
 }
 
 /* ==========================================================================
@@ -453,7 +478,6 @@ body {
   font-size: 1.05rem;
 }
 
-/* Generic Card Grid */
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -494,10 +518,9 @@ body {
 }
 
 /* ==========================================================================
-   INSIDE SCHOOL MODULE (TIMETABLE, DISCREET CARDS, CHUNKING, TTS/STT)
+   INSIDE SCHOOL MODULE
    ========================================================================== */
 
-/* Discreet Teacher Help Cards Grid */
 .discreet-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -534,7 +557,6 @@ body {
   font-size: 2.2rem;
 }
 
-/* Timetable */
 .timetable-list {
   display: flex;
   flex-direction: column;
@@ -588,7 +610,6 @@ body {
   font-weight: 600;
 }
 
-/* Task Chunking Checklist */
 .chunk-task-list {
   list-style: none;
   display: flex;
@@ -622,7 +643,6 @@ body {
   background: var(--bg-surface);
 }
 
-/* TTS & STT Smart Reader */
 .reader-box textarea {
   width: 100%;
   min-height: 140px;
@@ -648,7 +668,6 @@ body {
    REAL LIFE & INDEPENDENCE MODULE
    ========================================================================== */
 
-/* Social Stories */
 .social-story-card {
   background: var(--bg-surface);
   border: 2px solid var(--border-subtle);
@@ -694,7 +713,6 @@ body {
   font-size: 0.9rem;
 }
 
-/* Money Counter */
 .money-calculator {
   display: flex;
   flex-direction: column;
@@ -747,7 +765,7 @@ body {
 }
 
 /* ==========================================================================
-   AAC (AUGMENTATIVE & ALTERNATIVE COMMUNICATION) BOARD
+   AAC BOARD
    ========================================================================== */
 
 .aac-sentence-strip {
@@ -810,7 +828,7 @@ body {
 }
 
 .btn-speak-sentence:hover {
-  opacity: 0.9;
+  background: var(--accent-green-hover);
 }
 
 .aac-categories-tabs {
@@ -880,7 +898,6 @@ body {
   line-height: 1.2;
 }
 
-/* Category Color Accents */
 .aac-tile[data-category="urgent"] { border-color: var(--accent-rose); background: var(--accent-rose-light); }
 .aac-tile[data-category="needs"] { border-color: var(--accent-blue); background: var(--accent-blue-light); }
 .aac-tile[data-category="feelings"] { border-color: var(--accent-amber); background: var(--accent-amber-light); }
@@ -888,7 +905,7 @@ body {
 .aac-tile[data-category="actions"] { border-color: var(--accent-green); background: var(--accent-green-light); }
 
 /* ==========================================================================
-   CALM SENSORY SANCTUARY (DECOMPRESSION & REGULATION)
+   CALM SENSORY SANCTUARY
    ========================================================================== */
 
 .calm-container {
@@ -903,7 +920,6 @@ body {
   }
 }
 
-/* Visual Breathing Bubble */
 .breathing-box {
   display: flex;
   flex-direction: column;
@@ -955,7 +971,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* Ambient Procedural Noise Generator */
 .sound-track {
   display: flex;
   align-items: center;
@@ -982,7 +997,6 @@ body {
   cursor: pointer;
 }
 
-/* Zones of Regulation */
 .zones-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1002,10 +1016,15 @@ body {
   transform: translateY(-3px);
 }
 
-.zone-blue { background: #e0f2fe; border-color: #0284c7; color: #0369a1; }
-.zone-green { background: #dcfce7; border-color: #16a34a; color: #15803d; }
-.zone-yellow { background: #fef3c7; border-color: #d97706; color: #b45309; }
-.zone-red { background: #ffe4e6; border-color: #e11d48; color: #be123c; }
+.zone-card:focus-visible {
+  outline: 4px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+.zone-blue { background: #e0f2fe; border-color: #0369a1; color: #075985; }
+.zone-green { background: #dcfce7; border-color: #15803d; color: #166534; }
+.zone-yellow { background: #fef3c7; border-color: #b45309; color: #92400e; }
+.zone-red { background: #ffe4e6; border-color: #be123c; color: #9f1239; }
 
 /* ==========================================================================
    SAFE PASSAGE / PERSONAL EMERGENCY CARD
@@ -1098,14 +1117,14 @@ body {
   justify-content: space-between;
   padding: 1rem 1.4rem;
   background: var(--bg-surface);
-  border: 2.5px solid #22c55e;
+  border: 2.5px solid var(--accent-green);
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--text-primary);
   min-height: 82px;
   gap: 1rem;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.12);
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.12);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   user-select: none;
 }
@@ -1119,8 +1138,14 @@ body {
 .contact-pill:hover,
 .contact-pill:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.22);
-  border-color: #16a34a;
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.22);
+  border-color: var(--accent-green-hover);
+}
+
+.contact-pill:focus-visible {
+  outline: 4px solid var(--accent-blue-hover);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(7, 89, 133, 0.25);
 }
 
 .contact-info-wrap {
@@ -1197,21 +1222,39 @@ body {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.4rem;
-  background: #16a34a;
+  background: var(--accent-green);
   color: #ffffff !important;
   border-radius: var(--radius-full);
   font-weight: 800;
   font-size: 1.05rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+  box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
   transition: background 0.15s ease, transform 0.15s ease;
   min-height: 48px;
 }
 
 .contact-pill:hover .contact-call-btn {
-  background: #15803d;
+  background: var(--accent-green-hover);
   transform: scale(1.04);
 }
+
+/* Privacy banner (Week 1 patch) */
+.privacy-banner {
+  max-width: 720px;
+  margin: 1.5rem auto 0;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface-hover);
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+}
+.privacy-banner p { margin: 0; color: var(--text-secondary); }
+.privacy-banner strong { color: var(--text-primary); display: block; margin-bottom: 0.25rem; }
 
 /* Edit Modal Contact Sections */
 .modal-contact-section {
@@ -1252,7 +1295,7 @@ body {
 }
 
 .modal-contact-father .modal-section-title {
-  color: #0369a1;
+  color: #075985;
 }
 
 .modal-contact-mother .modal-section-title {
@@ -1305,7 +1348,7 @@ body {
 .form-field-group input:focus {
   border-color: var(--border-focus);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+  box-shadow: 0 0 0 3px rgba(7, 89, 133, 0.25);
 }
 
 .phone-input-style {
@@ -1317,7 +1360,7 @@ body {
 }
 
 /* ==========================================================================
-   CHROME DEVTOOLS & WCAG 2.2 A11Y AUDITOR PANEL
+   A11Y AUDITOR PANEL
    ========================================================================== */
 
 .auditor-dashboard {
@@ -1388,7 +1431,7 @@ body {
 .audit-badge.badge-fail { background: var(--accent-rose-light); color: var(--accent-rose); }
 
 /* ==========================================================================
-   MODAL / FULL-SCREEN PRESENTATION OVERLAY
+   MODAL / FULLSCREEN PRESENTATION OVERLAY
    ========================================================================== */
 
 .modal-overlay {
@@ -1446,7 +1489,6 @@ body {
   left: 1rem;
 }
 
-/* Fullscreen Presentation Card for Teacher / Helper */
 .presentation-card {
   text-align: center;
   padding: 2rem 1rem;
@@ -1465,10 +1507,9 @@ body {
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN (IPAD, TABLET & MOBILE VIEWPORTS)
+   RESPONSIVE
    ========================================================================== */
 
-/* 1. Tablets & iPads in Portrait / Landscape (max-width: 1024px) */
 @media (max-width: 1024px) {
   .main-content {
     padding: 0 1rem 3.5rem 1rem;
@@ -1525,7 +1566,6 @@ body {
   }
 }
 
-/* 2. Small Tablets & iPad Mini (max-width: 768px) */
 @media (max-width: 768px) {
   .header-top {
     flex-direction: column;
@@ -1643,7 +1683,6 @@ body {
   }
 }
 
-/* 3. Mobile Phones (max-width: 480px) */
 @media (max-width: 480px) {
   :root {
     --font-base-size: 16px;
@@ -1754,4 +1793,48 @@ body {
   .contact-person-name {
     font-size: 1rem;
   }
+}
+
+/* ==========================================================================
+   Week 2 a11y patch: hover-scoped read-aloud, form hints, timetable errors
+   ========================================================================== */
+
+/* Hover-to-read feedback: only on hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  body.hover-read-active .discreet-btn:hover,
+  body.hover-read-active .aac-tile:hover,
+  body.hover-read-active .zone-card:hover {
+    outline: 3px solid var(--accent-blue-hover);
+    outline-offset: 2px;
+  }
+}
+
+/* Inline form hint / error text */
+.form-hint {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+.form-hint[hidden] { display: none; }
+.form-hint-error {
+  color: var(--accent-rose);
+  font-weight: 700;
+}
+
+/* Disabled buttons (e.g., STT on unsupported browser) */
+.tool-btn[disabled],
+.tool-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Timetable delete button — matches inline style but ensures 36px min */
+.period-delete-btn {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

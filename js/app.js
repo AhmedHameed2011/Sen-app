@@ -1,6 +1,7 @@
 /**
  * Sanad - Master Application Orchestrator
  * Coordinates navigation, accessibility preferences, theme changes, and module bootstrapping.
+ * Week 1 a11y patch: nav uses aria-current instead of tab roles; storage keys aligned with privacy.js.
  */
 
 const app = {
@@ -32,23 +33,27 @@ const app = {
       // Deactivate all
       navLinks.forEach(link => {
         link.classList.remove('active');
-        link.setAttribute('aria-selected', 'false');
+        link.removeAttribute('aria-current');
       });
       sections.forEach(sec => sec.classList.remove('active'));
 
-      // Find active tab and section
+      // Find active link and section
       const activeLink = document.querySelector(`.nav-link[href="#${targetId}"]`);
       const activeSection = document.getElementById(`section-${targetId}`);
 
       if (activeLink && activeSection) {
         activeLink.classList.add('active');
-        activeLink.setAttribute('aria-selected', 'true');
+        activeLink.setAttribute('aria-current', 'page');
         activeSection.classList.add('active');
 
-        // Announce section change to screen readers
+        // Announce section change to screen readers (defer to let DOM settle)
         const announcer = document.getElementById('sr-announcer');
         if (announcer) {
-          announcer.textContent = `Navigated to ${activeLink.innerText}`;
+          const lang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'en';
+          const label = activeLink.innerText.trim();
+          announcer.textContent = lang === 'ar'
+            ? `تم الانتقال إلى ${label}`
+            : `Navigated to ${label}`;
         }
       }
     };
@@ -57,6 +62,7 @@ const app = {
       link.addEventListener('click', (e) => {
         const hash = link.getAttribute('href').replace('#', '');
         switchSection(hash);
+        // Do NOT preventDefault — allow anchor hash update for back/forward
       });
     });
 
@@ -112,7 +118,9 @@ const app = {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('sanad_theme', theme);
         // Trigger auditor update
-        if (auditorModule) auditorModule.runAudit();
+        if (typeof auditorModule !== 'undefined' && auditorModule && typeof auditorModule.runAudit === 'function') {
+          auditorModule.runAudit();
+        }
       });
     }
 
@@ -153,6 +161,8 @@ const app = {
 
   applyFontSize() {
     document.documentElement.style.setProperty('--font-base-size', `${this.currentFontSize}px`);
+    // NOTE: This key is deliberately distinct from 'sanad_font_scale' (used by
+    // privacy.js for the concept of a scale multiplier); here we persist the raw px value.
     localStorage.setItem('sanad_font_size', this.currentFontSize);
   },
 
@@ -192,7 +202,7 @@ const app = {
     if ('caches' in window) {
       caches.keys().then(keys => {
         keys.forEach(k => {
-          if (k !== 'sanad-v4-realtime') {
+          if (k !== 'sanad-v5-realtime') {
             console.log('Purging legacy cache:', k);
             caches.delete(k);
           }
@@ -201,7 +211,7 @@ const app = {
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=4').then(reg => {
+      navigator.serviceWorker.register('sw.js?v=5').then(reg => {
         reg.update(); // Trigger immediate background update check
       }).catch(err => {
         // Safe to ignore in sandbox or file protocol

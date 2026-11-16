@@ -1,6 +1,8 @@
 /**
  * Sanad - AAC (Augmentative and Alternative Communication) Board Module
  * High-affordance visual symbols, sentence strip builder, speech output, & custom tiles.
+ * Week 1 a11y patch: dedicated live region announces only the newly-added word;
+ * category tabs get roving keyboard focus; custom tiles persist + save.
  */
 
 const aacModule = {
@@ -66,10 +68,16 @@ const aacModule = {
   },
 
   loadCustomTiles() {
+    // Week 1 patch: support both old ('sanad_custom_aac') and new ('sanad_custom_aac_tiles') keys
     try {
-      const saved = localStorage.getItem('sanad_custom_aac');
+      const saved = localStorage.getItem('sanad_custom_aac_tiles')
+        || localStorage.getItem('sanad_custom_aac');
       if (saved) {
         this.customTiles = JSON.parse(saved);
+        // Migrate to the canonical key so privacy.js can wipe it
+        if (!localStorage.getItem('sanad_custom_aac_tiles')) {
+          localStorage.setItem('sanad_custom_aac_tiles', saved);
+        }
       }
     } catch (e) {
       console.warn("Could not load custom AAC tiles", e);
@@ -78,6 +86,8 @@ const aacModule = {
 
   saveCustomTiles() {
     try {
+      localStorage.setItem('sanad_custom_aac_tiles', JSON.stringify(this.customTiles));
+      // Keep legacy key in sync for older backups
       localStorage.setItem('sanad_custom_aac', JSON.stringify(this.customTiles));
     } catch (e) {
       console.warn("Could not save custom AAC tiles", e);
@@ -89,18 +99,44 @@ const aacModule = {
   },
 
   renderCategoryTabs() {
-    const tabs = document.querySelectorAll('.aac-cat-btn');
+    const tabs = Array.from(document.querySelectorAll('.aac-cat-btn[data-cat]'));
+    if (tabs.length === 0) return;
+
+    // Sync active state to this.currentCategory (important after lang-change re-render)
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
+      const isActive = tab.getAttribute('data-cat') === this.currentCategory;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      tab.setAttribute('tabindex', isActive ? '0' : '-1');
+
+      // Click handler is attached once per element in the DOM — guard with a flag
+      if (!tab.dataset.bound) {
+        tab.dataset.bound = '1';
+        tab.addEventListener('click', () => {
+          this.currentCategory = tab.getAttribute('data-cat');
+          this.renderCategoryTabs();
+          this.renderGrid();
         });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-        this.currentCategory = tab.getAttribute('data-cat');
-        this.renderGrid();
-      });
+        tab.addEventListener('keydown', (e) => {
+          const i = tabs.indexOf(tab);
+          let next = -1;
+          if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+          else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+          else if (e.key === 'Home') next = 0;
+          else if (e.key === 'End') next = tabs.length - 1;
+          else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            tab.click();
+            return;
+          }
+          if (next !== -1) {
+            e.preventDefault();
+            const newTabs = Array.from(document.querySelectorAll('.aac-cat-btn[data-cat]'));
+            newTabs[next].focus();
+            newTabs[next].click();
+          }
+        });
+      }
     });
   },
 
@@ -109,8 +145,8 @@ const aacModule = {
     if (!grid) return;
 
     const all = this.getAllTiles();
-    const filtered = (this.currentCategory === 'all') 
-      ? all 
+    const filtered = (this.currentCategory === 'all')
+      ? all
       : all.filter(t => t.cat === this.currentCategory);
 
     const lang = i18n.currentLang;
@@ -135,9 +171,29 @@ const aacModule = {
           speechEngine.speak(word);
           this.sentenceStrip.push(tile);
           this.updateSentenceStripDisplay();
+          this.announceTileAdded(word);
         }
       });
     });
+  },
+
+  /**
+   * Week 1 a11y patch: announce only the newly-added word (not the whole sentence).
+   */
+  announceTileAdded(word) {
+    const liveEl = document.getElementById('aac-live-status');
+    if (!liveEl) return;
+    const lang = i18n.currentLang;
+    const count = this.sentenceStrip.length;
+    liveEl.textContent = (lang === 'ar')
+      ? `تمت إضافة "${word}". الجملة تحتوي على ${count} كلمة.`
+      : `Added "${word}". Sentence now has ${count} word${count === 1 ? '' : 's'}.`;
+  },
+
+  announceCleared() {
+    const liveEl = document.getElementById('aac-live-status');
+    if (!liveEl) return;
+    liveEl.textContent = (i18n.currentLang === 'ar') ? 'تم مسح الجملة.' : 'Sentence cleared.';
   },
 
   updateSentenceStripDisplay() {
@@ -149,7 +205,7 @@ const aacModule = {
     if (this.sentenceStrip.length === 0) {
       stream.innerHTML = `
         <span id="aac-empty-placeholder" style="color: var(--text-muted); font-style: italic; font-size: 1.05rem;">
-          ${i18n.t('sentence_empty_hint')}
+          ${(typeof i18n.t === 'function') ? i18n.t('sentence_empty_hint') : 'Tap cards below to build your sentence...'}
         </span>
       `;
       return;
@@ -194,6 +250,7 @@ const aacModule = {
       btnClear.addEventListener('click', () => {
         this.sentenceStrip = [];
         this.updateSentenceStripDisplay();
+        this.announceCleared();
       });
     }
   },
@@ -217,7 +274,8 @@ const aacModule = {
         if (modal) {
           modal.classList.add('open');
           modal.setAttribute('aria-hidden', 'false');
-          document.getElementById('input-tile-text').focus();
+          const input = document.getElementById('input-tile-text');
+          if (input) input.focus();
         }
       });
     }

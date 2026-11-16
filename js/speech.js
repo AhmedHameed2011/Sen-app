@@ -1,39 +1,96 @@
 /**
  * Sanad - Speech & Audio Accessibility Engine
  * Web Speech Synthesis (TTS), Web Speech Recognition (STT), & UI Audio Feedback.
+ * Week 2 patch: feature detection, graceful STT/TTS degradation,
+ * hover-to-read scoped to hover-capable devices, voice warm-up.
  */
 
+// Feature detection run once at module load
+const SPEECH_SUPPORT = (function detectSupport() {
+  if (typeof window === 'undefined') {
+    return { tts: false, stt: false, audio: false, canHover: false };
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const canHover = (typeof window.matchMedia === 'function')
+    ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    : false;
+  return {
+    tts: 'speechSynthesis' in window,
+    stt: !!SR,
+    audio: !!AudioCtx,
+    canHover
+  };
+})();
+
 const speechEngine = {
-  synth: window.speechSynthesis,
+  support: SPEECH_SUPPORT,
+  synth: (typeof window !== 'undefined' && window.speechSynthesis) ? window.speechSynthesis : null,
   recognition: null,
   isRecognizing: false,
   hoverReadEnabled: false,
   speechRate: 1.0,
   audioCtx: null,
+  _voicesLoaded: false,
+  _pendingSpeak: null,
 
   init() {
     this.initAudioContext();
+    this.initVoices();
     this.initRecognition();
     this.setupHoverReader();
   },
 
   initAudioContext() {
+    if (!this.support.audio) {
+      console.info('[speechEngine] Web Audio unavailable — chimes disabled.');
+      return;
+    }
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.audioCtx = new AudioContext();
-      }
+      this.audioCtx = new AudioContext();
     } catch (e) {
-      console.warn("Web Audio API not supported", e);
+      console.warn('[speechEngine] AudioContext creation failed', e);
+      this.audioCtx = null;
     }
   },
 
   /**
-   * Speak text out loud in the appropriate voice (English or Arabic)
+   * Voices are loaded asynchronously in most browsers (especially Chrome).
+   * We warm the cache and, if a speak() call arrives before voices are ready,
+   * we queue it and replay when they land.
+   */
+  initVoices() {
+    if (!this.synth) return;
+
+    const tryLoad = () => {
+      const voices = this.synth.getVoices();
+      if (voices && voices.length > 0) {
+        this._voicesLoaded = true;
+        if (this._pendingSpeak) {
+          const { text, onEnd } = this._pendingSpeak;
+          this._pendingSpeak = null;
+          this.speak(text, onEnd);
+        }
+      }
+    };
+
+    tryLoad();
+    if (typeof this.synth.addEventListener === 'function') {
+      this.synth.addEventListener('voiceschanged', tryLoad);
+    } else {
+      this.synth.onvoiceschanged = tryLoad;
+    }
+  },
+
+  /**
+   * Speak text out loud. Silently no-ops if TTS is unavailable
+   * (rather than alerting — better for AAC context).
    */
   speak(text, onEnd) {
-    if (!this.synth) {
-      console.warn("Speech Synthesis not supported in this browser.");
+    if (!this.support.tts || !this.synth) {
+      // Graceful no-op — announce to screen reader only
+      this._announce('Text to speech is unavailable on this device.');
       return;
     }
 
@@ -42,6 +99,13 @@ const speechEngine = {
 
     if (!text || text.trim() === '') return;
 
+    // If voices haven't loaded yet, queue and retry after voiceschanged fires.
+    const voices = this.synth.getVoices();
+    if ((!voices || voices.length === 0) && !this._voicesLoaded) {
+      this._pendingSpeak = { text, onEnd };
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = this.speechRate;
 
@@ -49,37 +113,43 @@ const speechEngine = {
     const isArabic = /[\u0600-\u06FF]/.test(text);
     utterance.lang = isArabic ? 'ar-SA' : 'en-US';
 
-    const voices = this.synth.getVoices();
-    if (voices.length > 0) {
-      const targetVoice = voices.find(v => isArabic ? v.lang.startsWith('ar') : v.lang.startsWith('en'));
-      if (targetVoice) {
-        utterance.voice = targetVoice;
-      }
+    if (voices && voices.length > 0) {
+      const targetVoice = voices.find(v =>
+        isArabic ? v.lang.startsWith('ar') : v.lang.startsWith('en')
+      );
+      if (targetVoice) utterance.voice = targetVoice;
     }
 
-    if (onEnd) {
-      utterance.onend = onEnd;
-    }
+    if (onEnd) utterance.onend = onEnd;
 
-    this.synth.speak(utterance);
+    try {
+      this.synth.speak(utterance);
+    } catch (e) {
+      console.warn('[speechEngine] speak() failed', e);
+    }
   },
 
   stopSpeaking() {
-    if (this.synth) {
-      this.synth.cancel();
-    }
+    if (this.synth) this.synth.cancel();
+  },
+
+  _announce(msg) {
+    const sr = document.getElementById('sr-alert');
+    if (sr) sr.textContent = msg;
   },
 
   /**
    * Speech-to-Text Voice Dictation
    */
   initRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn("Speech Recognition not supported in this browser.");
+    if (!this.support.stt) {
+      console.info('[speechEngine] Speech Recognition unavailable in this browser.');
+      // Disable the dictate button up-front so users see the reason
+      this._disableDictateButton();
       return;
     }
 
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     this.recognition = new SpeechRecognition();
     this.recognition.continuous = true;
     this.recognition.interimResults = true;
@@ -113,11 +183,33 @@ const speechEngine = {
     };
   },
 
+  _disableDictateButton() {
+    // We defer this to DOMContentLoaded because init() may run before the button exists
+    const applyDisabled = () => {
+      const btn = document.getElementById('btn-stt-record');
+      if (!btn) return;
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.setAttribute('title', 'Voice dictation is not available in this browser');
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      const hint = document.getElementById('stt-unsupported-hint');
+      if (hint) hint.hidden = false;
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyDisabled, { once: true });
+    } else {
+      applyDisabled();
+    }
+  },
+
   toggleDictation(lang = 'en') {
     if (!this.recognition) {
-      alert(i18n.currentLang === 'ar' 
-        ? "متصفحك الحالي لا يدعم الإملاء الصوتي المباشر. يرجى تجربة Chrome أو Edge."
-        : "Your browser does not support voice recognition. Please try Google Chrome or Edge.");
+      // Should rarely hit because we disable the button, but guard anyway.
+      const msg = (typeof i18n !== 'undefined' && i18n.currentLang === 'ar')
+        ? "الإملاء الصوتي غير متاح في هذا المتصفح. يمكنك الكتابة بدلاً من ذلك."
+        : "Voice dictation is not available in this browser. You can type instead.";
+      this._announce(msg);
       return;
     }
 
@@ -138,9 +230,15 @@ const speechEngine = {
   },
 
   /**
-   * Hover-to-Read: Reads out button or card title when student hovers or focuses it
+   * Hover-to-Read: only attached on devices with real hover capability
+   * (mouse/trackpad). Touch devices skip entirely — no accidental speaking.
    */
   setupHoverReader() {
+    if (!this.support.canHover) {
+      console.info('[speechEngine] Hover-to-read disabled (no hover-capable pointer).');
+      return;
+    }
+
     let hoverTimeout = null;
 
     document.addEventListener('mouseover', (e) => {
@@ -174,10 +272,10 @@ const speechEngine = {
       const gain = this.audioCtx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-      osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-      osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(659.25, now + 0.1);
+      osc.frequency.setValueAtTime(783.99, now + 0.2);
+      osc.frequency.setValueAtTime(1046.50, now + 0.3);
 
       gain.gain.setValueAtTime(0.15, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);

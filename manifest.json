@@ -2,20 +2,63 @@
   "name": "Sanad - Determination Companion",
   "short_name": "Sanad",
   "description": "Empowering companion web app for students of determination inside school and outside in real life.",
+  "id": "/?source=pwa",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0284c7",
-  "theme_color": "#0284c7",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "lang": "en",
+  "dir": "ltr",
+  "background_color": "#0369a1",
+  "theme_color": "#0369a1",
+  "categories": ["education", "accessibility", "productivity"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230284c7'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>س</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
+      "src": "icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230284c7'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>س</text></svg>",
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230369a1'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>س</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Safe ID Card",
+      "short_name": "Safe Card",
+      "description": "Open your emergency Safe ID Card",
+      "url": "./index.html#safe",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Talk & AAC",
+      "short_name": "AAC",
+      "description": "Open the communication board",
+      "url": "./index.html#aac",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

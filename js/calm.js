@@ -1,6 +1,8 @@
 /**
  * Sanad - Sensory Calm Sanctuary Module
  * Visual Breathing Bubble, Web Audio Procedural Noise Synthesizers, & Zones of Regulation.
+ * Week 1 a11y patch: breathing phase drives a data-phase attribute for reduced-motion
+ * opacity fallback; UI updates on language change correctly re-sync.
  */
 
 const calmModule = {
@@ -8,7 +10,7 @@ const calmModule = {
   breathingInterval: null,
   isBreathingActive: true,
   currentPattern: 'box',
-  breathPhase: 0, // 0: inhale, 1: hold, 2: exhale, 3: rest
+  breathPhase: 0, // index into pattern array
   breathCounter: 4,
 
   // Audio nodes for procedural sound generator
@@ -22,19 +24,19 @@ const calmModule = {
 
   patterns: {
     box: [
-      { name_en: "Inhale", name_ar: "شهيق", duration: 4, scale: 1.6, color: "var(--accent-blue-light)" },
-      { name_en: "Hold", name_ar: "احبس النفس", duration: 4, scale: 1.6, color: "var(--accent-purple-light)" },
-      { name_en: "Exhale", name_ar: "زفير", duration: 4, scale: 1.0, color: "var(--accent-green-light)" },
-      { name_en: "Rest", name_ar: "استرح", duration: 4, scale: 1.0, color: "var(--bg-surface-hover)" }
+      { name_en: "Inhale", name_ar: "شهيق", duration: 4, scale: 1.6, phase: 'inhale', color: "var(--accent-blue-light)" },
+      { name_en: "Hold", name_ar: "احبس النفس", duration: 4, scale: 1.6, phase: 'hold', color: "var(--accent-purple-light)" },
+      { name_en: "Exhale", name_ar: "زفير", duration: 4, scale: 1.0, phase: 'exhale', color: "var(--accent-green-light)" },
+      { name_en: "Rest", name_ar: "استرح", duration: 4, scale: 1.0, phase: 'hold', color: "var(--bg-surface-hover)" }
     ],
     calm: [
-      { name_en: "Inhale", name_ar: "شهيق", duration: 4, scale: 1.6, color: "var(--accent-blue-light)" },
-      { name_en: "Hold", name_ar: "احبس النفس", duration: 7, scale: 1.6, color: "var(--accent-purple-light)" },
-      { name_en: "Exhale", name_ar: "زفير ببطء", duration: 8, scale: 1.0, color: "var(--accent-green-light)" }
+      { name_en: "Inhale", name_ar: "شهيق", duration: 4, scale: 1.6, phase: 'inhale', color: "var(--accent-blue-light)" },
+      { name_en: "Hold", name_ar: "احبس النفس", duration: 7, scale: 1.6, phase: 'hold', color: "var(--accent-purple-light)" },
+      { name_en: "Exhale", name_ar: "زفير ببطء", duration: 8, scale: 1.0, phase: 'exhale', color: "var(--accent-green-light)" }
     ],
     gentle: [
-      { name_en: "Inhale", name_ar: "شهيق هادئ", duration: 3, scale: 1.5, color: "var(--accent-blue-light)" },
-      { name_en: "Exhale", name_ar: "زفير هادئ", duration: 3, scale: 1.0, color: "var(--accent-green-light)" }
+      { name_en: "Inhale", name_ar: "شهيق هادئ", duration: 3, scale: 1.5, phase: 'inhale', color: "var(--accent-blue-light)" },
+      { name_en: "Exhale", name_ar: "زفير هادئ", duration: 3, scale: 1.0, phase: 'exhale', color: "var(--accent-green-light)" }
     ]
   },
 
@@ -85,6 +87,11 @@ const calmModule = {
     countdown.textContent = this.breathCounter;
     circle.style.transform = `scale(${current.scale})`;
     circle.style.transition = `transform ${current.duration}s ease-in-out`;
+
+    // Week 1 a11y patch: drive reduced-motion opacity fallback in CSS
+    if (current.phase) {
+      circle.setAttribute('data-phase', current.phase);
+    }
   },
 
   playGentleTick() {
@@ -114,11 +121,11 @@ const calmModule = {
         const icon = document.getElementById('breathing-btn-icon');
         const text = document.getElementById('breathing-btn-text');
         if (this.isBreathingActive) {
-          icon.textContent = '⏸️';
-          text.textContent = i18n.t('pause_breathing');
+          if (icon) icon.textContent = '⏸️';
+          if (text) text.textContent = i18n.t('pause_breathing');
         } else {
-          icon.textContent = '▶️';
-          text.textContent = i18n.t('resume_breathing');
+          if (icon) icon.textContent = '▶️';
+          if (text) text.textContent = i18n.t('resume_breathing');
         }
       });
     }
@@ -158,7 +165,7 @@ const calmModule = {
         const white = Math.random() * 2 - 1;
         output[i] = (lastOut + (0.02 * white)) / 1.02;
         lastOut = output[i];
-        output[i] *= 3.5; // Gain compensation
+        output[i] *= 3.5;
       }
 
       const whiteNoise = this.audioCtx.createBufferSource();
@@ -233,9 +240,8 @@ const calmModule = {
       filter.frequency.setValueAtTime(450, this.audioCtx.currentTime);
       filter.Q.setValueAtTime(1.5, this.audioCtx.currentTime);
 
-      // LFO for wave ebb and flow
       const lfo = this.audioCtx.createOscillator();
-      lfo.frequency.setValueAtTime(0.12, this.audioCtx.currentTime); // 8 second wave cycle
+      lfo.frequency.setValueAtTime(0.12, this.audioCtx.currentTime);
       const lfoGain = this.audioCtx.createGain();
       lfoGain.gain.setValueAtTime(300, this.audioCtx.currentTime);
       lfo.connect(lfoGain);
@@ -295,27 +301,27 @@ const calmModule = {
     if (sliderBrown) {
       sliderBrown.addEventListener('input', () => {
         const val = parseFloat(sliderBrown.value);
-        labelBrown.textContent = `${Math.round(val * 100)}%`;
+        if (labelBrown) labelBrown.textContent = `${Math.round(val * 100)}%`;
         const gain = this.getOrCreateBrownNoise();
-        gain.gain.setValueAtTime(val * 0.4, this.audioCtx.currentTime);
+        if (gain && this.audioCtx) gain.gain.setValueAtTime(val * 0.4, this.audioCtx.currentTime);
       });
     }
 
     if (sliderRain) {
       sliderRain.addEventListener('input', () => {
         const val = parseFloat(sliderRain.value);
-        labelRain.textContent = `${Math.round(val * 100)}%`;
+        if (labelRain) labelRain.textContent = `${Math.round(val * 100)}%`;
         const gain = this.getOrCreateRainNoise();
-        gain.gain.setValueAtTime(val * 0.5, this.audioCtx.currentTime);
+        if (gain && this.audioCtx) gain.gain.setValueAtTime(val * 0.5, this.audioCtx.currentTime);
       });
     }
 
     if (sliderOcean) {
       sliderOcean.addEventListener('input', () => {
         const val = parseFloat(sliderOcean.value);
-        labelOcean.textContent = `${Math.round(val * 100)}%`;
+        if (labelOcean) labelOcean.textContent = `${Math.round(val * 100)}%`;
         const gain = this.getOrCreateOceanNoise();
-        gain.gain.setValueAtTime(val * 0.6, this.audioCtx.currentTime);
+        if (gain && this.audioCtx) gain.gain.setValueAtTime(val * 0.6, this.audioCtx.currentTime);
       });
     }
 

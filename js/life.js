@@ -1,12 +1,17 @@
 /**
  * Sanad - Real Life & Community Skills Module
  * Interactive Social Stories, Visual Money Calculator, & Daily Independence Routines.
+ * Week 1 a11y patch: money input clamped, storage keys aligned, story tabs get roving keyboard focus.
  */
 
 const lifeModule = {
   currentStoryIndex: 0,
   moneyInHand: 0,
   waterGlassesDrank: 0,
+
+  PRICE_MAX: 10000,
+  PRICE_MIN: 0,
+  PRICE_STEP: 0.5,
 
   socialStories: [
     {
@@ -60,7 +65,7 @@ const lifeModule = {
       ],
       steps_ar: [
         "انتظر عند نقطة توقف الحافلة بعيداً عن الطريق حتى تتوقف تماماً.",
-        "حيِّ المشرف والسائق بابتسامة أو تلويحة ودية.",
+        "حيِّ المشرف والسائق بابتسامة أو تلويحة ودية.",
         "توجه إلى مقعدك المخصص واربط حزام الأمان فوراً.",
         "حافظ على حقيبتك وأغراضك داخل نطاق مقعدك طوال الرحلة.",
         "ابقَ جالساً حتى تتوقف الحافلة كلياً عند وجهتك."
@@ -126,6 +131,7 @@ const lifeModule = {
       this.renderActiveStory();
       this.updateMoneyDisplay();
       this.renderBackpackTasks();
+      this.renderWaterGlasses();
     });
   },
 
@@ -134,21 +140,51 @@ const lifeModule = {
     if (!tabsContainer) return;
 
     const lang = i18n.currentLang;
+    tabsContainer.setAttribute('role', 'tablist');
+
     tabsContainer.innerHTML = this.socialStories.map((story, idx) => {
       const title = (lang === 'ar') ? story.title_ar : story.title_en;
       const activeClass = (idx === this.currentStoryIndex) ? 'active' : '';
+      const tabIndex = (idx === this.currentStoryIndex) ? 0 : -1;
       return `
-        <button class="aac-cat-btn ${activeClass}" data-index="${idx}" role="tab" aria-selected="${idx === this.currentStoryIndex}">
+        <button
+          class="aac-cat-btn ${activeClass}"
+          data-index="${idx}"
+          role="tab"
+          aria-selected="${idx === this.currentStoryIndex}"
+          tabindex="${tabIndex}">
           ${title}
         </button>
       `;
     }).join('');
 
-    tabsContainer.querySelectorAll('.aac-cat-btn').forEach(btn => {
+    const tabs = Array.from(tabsContainer.querySelectorAll('.aac-cat-btn'));
+
+    tabs.forEach((btn, i) => {
       btn.addEventListener('click', () => {
         this.currentStoryIndex = parseInt(btn.getAttribute('data-index'));
         this.renderStoryTabs();
         this.renderActiveStory();
+      });
+      btn.addEventListener('keydown', (e) => {
+        let next = -1;
+        if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+          return;
+        }
+        if (next !== -1) {
+          e.preventDefault();
+          this.currentStoryIndex = next;
+          this.renderStoryTabs();
+          this.renderActiveStory();
+          const newTabs = tabsContainer.querySelectorAll('.aac-cat-btn');
+          if (newTabs[next]) newTabs[next].focus();
+        }
       });
     });
   },
@@ -194,13 +230,26 @@ const lifeModule = {
     const resetBtn = document.getElementById('btn-money-reset');
 
     if (priceInput) {
+      // Live update as user types
       priceInput.addEventListener('input', () => this.updateMoneyDisplay());
+      // Week 1 a11y patch: clamp on change/blur
+      priceInput.addEventListener('change', () => {
+        const v = parseFloat(priceInput.value);
+        if (!Number.isFinite(v) || v < this.PRICE_MIN) {
+          priceInput.value = this.PRICE_MIN;
+        } else if (v > this.PRICE_MAX) {
+          priceInput.value = this.PRICE_MAX;
+        } else {
+          priceInput.value = Math.round(v * 100) / 100;
+        }
+        this.updateMoneyDisplay();
+      });
     }
 
     moneyBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const val = parseFloat(btn.getAttribute('data-val'));
-        this.moneyInHand += val;
+        this.moneyInHand = Math.round((this.moneyInHand + val) * 100) / 100;
         this.updateMoneyDisplay();
         speechEngine.playSuccessChime();
       });
@@ -226,23 +275,25 @@ const lifeModule = {
     const lang = i18n.currentLang;
     const currency = (lang === 'ar') ? 'درهم' : '$';
 
-    totalDisplay.textContent = (lang === 'ar') ? `${this.moneyInHand.toFixed(2)} ${currency}` : `${currency}${this.moneyInHand.toFixed(2)}`;
+    totalDisplay.textContent = (lang === 'ar')
+      ? `${this.moneyInHand.toFixed(2)} ${currency}`
+      : `${currency}${this.moneyInHand.toFixed(2)}`;
 
     if (this.moneyInHand >= price && price > 0) {
       const change = (this.moneyInHand - price).toFixed(2);
       statusBadge.style.background = 'var(--accent-green-light)';
       statusBadge.style.color = 'var(--accent-green)';
       statusBadge.style.borderColor = 'var(--accent-green)';
-      statusBadge.textContent = (lang === 'ar') 
-        ? `✅ نعم يمكنك الشراء! سيعود لك: ${change} درهم` 
+      statusBadge.textContent = (lang === 'ar')
+        ? `✅ نعم يمكنك الشراء! سيعود لك: ${change} درهم`
         : `✅ Yes you can buy it! Change: $${change}`;
     } else {
-      const needed = (price - this.moneyInHand).toFixed(2);
+      const needed = Math.max(0, price - this.moneyInHand).toFixed(2);
       statusBadge.style.background = 'var(--accent-amber-light)';
       statusBadge.style.color = 'var(--accent-amber)';
       statusBadge.style.borderColor = 'var(--accent-amber)';
-      statusBadge.textContent = (lang === 'ar') 
-        ? `⚠️ تحتاج إلى: ${needed} درهم إضافية` 
+      statusBadge.textContent = (lang === 'ar')
+        ? `⚠️ تحتاج إلى: ${needed} درهم إضافية`
         : `⚠️ Need $${needed} more`;
     }
   },
@@ -256,12 +307,16 @@ const lifeModule = {
     for (let i = 1; i <= 8; i++) {
       const isFilled = i <= this.waterGlassesDrank;
       const cup = document.createElement('button');
+      cup.type = 'button';
       cup.className = 'tool-btn';
       cup.style.minHeight = '60px';
       cup.style.fontSize = '1.6rem';
       cup.style.background = isFilled ? 'var(--accent-blue-light)' : 'var(--bg-surface)';
       cup.style.borderColor = isFilled ? 'var(--accent-blue)' : 'var(--border-subtle)';
-      cup.setAttribute('aria-label', `Glass of water ${i} of 8`);
+      cup.setAttribute('aria-label', i18n.currentLang === 'ar'
+        ? `كوب ماء ${i} من 8`
+        : `Glass of water ${i} of 8`);
+      cup.setAttribute('aria-pressed', isFilled ? 'true' : 'false');
       cup.innerHTML = isFilled ? '🥛💧' : '🥛';
 
       cup.addEventListener('click', () => {
@@ -294,19 +349,26 @@ const lifeModule = {
         <li class="chunk-task-item ${completedClass}" data-id="${t.id}" tabindex="0" role="checkbox" aria-checked="${t.done}">
           <input type="checkbox" id="backpack-cb-${t.id}" ${t.done ? 'checked' : ''} tabindex="-1">
           <label for="backpack-cb-${t.id}" style="cursor: pointer; flex: 1; font-weight: 700; font-size: 1rem;">${text}</label>
-          ${t.done ? '<span>✅</span>' : ''}
+          ${t.done ? '<span aria-hidden="true">✅</span>' : ''}
         </li>
       `;
     }).join('');
 
     list.querySelectorAll('.chunk-task-item').forEach(item => {
-      item.addEventListener('click', () => {
+      const toggle = () => {
         const id = parseInt(item.getAttribute('data-id'));
         const task = this.backpackTasks.find(t => t.id === id);
         if (task) {
           task.done = !task.done;
           if (task.done) speechEngine.playSuccessChime();
           this.renderBackpackTasks();
+        }
+      };
+      item.addEventListener('click', toggle);
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
         }
       });
     });

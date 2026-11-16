@@ -1,11 +1,12 @@
 /**
  * Sanad - Internationalization & Dual Language Engine (English & Arabic)
  * Provides comprehensive translations and RTL/LTR layout handling.
+ * Week 2 patch: added keys for feature detection, timetable modal, persistence.
  */
 
 const i18n = {
   currentLang: 'en',
-  
+
   translations: {
     en: {
       skip_to_content: "Skip to main content",
@@ -19,7 +20,7 @@ const i18n = {
       nav_calm: "Calm Zone",
       nav_safe: "Safe ID Card",
       nav_audit: "A11y Auditor",
-      
+
       // School
       school_title: "School Companion",
       school_subtitle: "Your daily classroom schedule, discreet teacher cards, step-by-step homework chunker, and speech reader.",
@@ -38,7 +39,7 @@ const i18n = {
       btn_dictate: "Voice Dictate",
       btn_clear_text: "Clear",
       speed_label: "Speed:",
-      
+
       // Real Life
       life_title: "Real Life & Community Skills",
       life_subtitle: "Practical social stories, interactive shopping & money calculator, and independent living routines.",
@@ -52,7 +53,7 @@ const i18n = {
       hydration_title: "Daily Hydration & Wellbeing",
       hydration_desc: "Drinking water keeps your brain sharp and helps you stay calm. Tap to drink a glass!",
       backpack_routine_title: "🎒 Evening Backpack Checklist",
-      
+
       // AAC
       aac_title: "Talk & AAC Communication Board",
       aac_subtitle: "Express your thoughts, needs, and feelings with tap-to-speak symbols or build complete sentences.",
@@ -65,7 +66,7 @@ const i18n = {
       cat_feelings: "😊 Feelings",
       cat_social: "👋 Social",
       cat_actions: "🏃 Actions",
-      
+
       // Calm
       calm_title: "Sensory Calm Sanctuary",
       calm_subtitle: "Reset your nervous system with guided visual breathing, soothing procedural soundscapes, and the Zones of Regulation.",
@@ -94,7 +95,7 @@ const i18n = {
       zone_red_title: "Red Zone",
       zone_red_desc: "Overwhelmed, Very Angry, Out of control",
       zone_red_action: "👉 Stop & Seek Safe Adult",
-      
+
       // Safe Card
       safe_title: "Safe Passage & Personal ID Card",
       safe_subtitle: "High-visibility identification card for non-verbal or stressful moments. Show directly to teachers, bus drivers, or helpers.",
@@ -114,18 +115,23 @@ const i18n = {
       label_father_phone: "Father's Phone Number:",
       label_mother_name: "Mother's Full Name:",
       label_mother_phone: "Mother's Phone Number:",
-      
+
+      // Privacy
+      privacy_title: "🔒 Your data stays on this device.",
+      privacy_desc: "Name, contacts, medical notes, and custom AAC tiles are stored only in this browser's local storage. They are never sent to a server.",
+      privacy_wipe: "🗑️ Wipe my data",
+
       // Auditor
       audit_title: "Chrome DevTools & WCAG 2.2 Live Auditor",
       audit_subtitle: "Integrated accessibility engine that validates contrast ratios, tap targets (48x48px), heading structures, and ARIA landmarks live on this page.",
       btn_run_audit: "Run Full Audit",
       audit_overall_score: "WCAG Compliance Score",
       audit_tap_target: "Tap Targets (≥48px)",
-      audit_contrast: "Color Contrast (AAA)",
+      audit_contrast: "Color Contrast (AA / AAA modes)",
       audit_aria_labels: "Labels & ARIA Names",
       audit_checklist_title: "DevTools Verification Checklist",
       audit_updated_just_now: "Tested Live in DOM",
-      
+
       // Modals
       btn_speak_again: "Speak Out Loud",
       btn_understood: "Understood / Thank You",
@@ -142,9 +148,24 @@ const i18n = {
       label_icon_emoji: "Icon or Emoji:",
       label_tile_phrase: "Tile Phrase (Spoken Text):",
       label_tile_category: "Category:",
-      btn_create_tile: "Add Tile"
+      btn_create_tile: "Add Tile",
+
+      // Week 2: Speech feature-detection + timetable modal + persistence
+      stt_unsupported: "Voice dictation isn't available in this browser. You can type instead.",
+      tts_no_voices: "Text-to-speech isn't available on this device.",
+      modal_add_period_title: "➕ Add Class Period",
+      label_period_name: "Class name:",
+      label_period_start: "Start time:",
+      label_period_end: "End time:",
+      btn_add_period_submit: "Add to Timetable",
+      error_period_overlap: "This time overlaps with an existing period.",
+      error_period_order: "End time must be after start time.",
+      error_period_name: "Please enter a class name.",
+      error_period_times: "Please set both start and end times.",
+      auditor_features_ok: "All browser features available.",
+      auditor_features_deg: "Some features unavailable in this browser (see details)."
     },
-    
+
     ar: {
       skip_to_content: "انتقل إلى المحتوى الرئيسي",
       brand_subtitle: "الرفيق التمكيني لأصحاب الهمم داخل المدرسة وفي الحياة اليومية",
@@ -157,7 +178,7 @@ const i18n = {
       nav_calm: "واحة الهدوء",
       nav_safe: "بطاقة الهوية الآمنة",
       nav_audit: "مدقق سهولة الوصول",
-      
+
       // School
       school_title: "رفيق المدرسة",
       school_subtitle: "جدولك الصفي البصري، بطاقات المعلم الذكية، تفكيك الواجبات خطوة بخطوة، وقارئ النصوص الصوتي.",
@@ -176,7 +197,7 @@ const i18n = {
       btn_dictate: "إملاء صوتي",
       btn_clear_text: "مسح",
       speed_label: "السرعة:",
-      
+
       // Real Life
       life_title: "المهارات الحياتية والاستقلالية",
       life_subtitle: "قصص اجتماعية إرشادية تفاعلية، حاسبة النقود والتسوق، وروتين الحياة اليومية.",
@@ -190,7 +211,7 @@ const i18n = {
       hydration_title: "شرب الماء وصحة الجسم",
       hydration_desc: "شرب الماء ينشط ذهنك ويساعدك على الهدوء. انقر لشرب كوب!",
       backpack_routine_title: "🎒 قائمة تجهيز الحقيبة المسائية",
-      
+
       // AAC
       aac_title: "لوحة التواصل البديل والمعزز (AAC)",
       aac_subtitle: "عبر عن أفكارك واحتياجاتك ومشاعرك بلمسة واحدة أو ركّب جملاً كاملة.",
@@ -203,7 +224,7 @@ const i18n = {
       cat_feelings: "😊 مشاعر",
       cat_social: "👋 اجتماعي",
       cat_actions: "🏃 أفعال",
-      
+
       // Calm
       calm_title: "واحة الهدوء الحسي والاسترخاء",
       calm_subtitle: "أعد ضبط جهازك العصبي عبر التنفس الإيقاعي البصري، والأصوات المهدئة، ومقياس المشاعر.",
@@ -232,7 +253,7 @@ const i18n = {
       zone_red_title: "المنطقة الحمراء",
       zone_red_desc: "غاضب جداً، فاقد السيطرة، انفجار حسي",
       zone_red_action: "👉 توقف واطلب مساعدة شخص موثوق",
-      
+
       // Safe Card
       safe_title: "بطاقة الهوية والعبور الآمن",
       safe_subtitle: "بطاقة تعريفية واضحة جداً للحظات التوتر أو عدم القدرة على الكلام. اعرضها للمعلم أو السائق.",
@@ -252,18 +273,23 @@ const i18n = {
       label_father_phone: "رقم هاتف الأب:",
       label_mother_name: "اسم الأم الكامل:",
       label_mother_phone: "رقم هاتف الأم:",
-      
+
+      // Privacy
+      privacy_title: "🔒 بياناتك تبقى على هذا الجهاز فقط.",
+      privacy_desc: "الاسم وجهات الاتصال والملاحظات الطبية والرموز المخصصة محفوظة فقط في ذاكرة المتصفح المحلية. لا يتم إرسالها إلى أي خادم.",
+      privacy_wipe: "🗑️ حذف بياناتي",
+
       // Auditor
       audit_title: "مدقق سهولة الوصول ومعايير ديف تولز WCAG 2.2",
       audit_subtitle: "محرك فحص مباشر يتحقق من تباين الألوان، أبعاد أزرار اللمس (≥48px)، هيكلية العناوين وتسميات ARIA.",
       btn_run_audit: "بدء الفحص الشامل",
       audit_overall_score: "درجة التوافق مع WCAG",
       audit_tap_target: "أهداف اللمس (≥48px)",
-      audit_contrast: "تباين الألوان (AAA)",
+      audit_contrast: "تباين الألوان (AA / أوضاع AAA)",
       audit_aria_labels: "التسميات ومساعدات القراءة",
       audit_checklist_title: "قائمة التحقق المباشرة",
       audit_updated_just_now: "تم الفحص مباشرة في المتصفح",
-      
+
       // Modals
       btn_speak_again: "نطق بصوت عالٍ",
       btn_understood: "تم الفهم / شكراً لك",
@@ -280,7 +306,22 @@ const i18n = {
       label_icon_emoji: "الأيقونة أو الرمز:",
       label_tile_phrase: "العبارة المنطوقة:",
       label_tile_category: "التصنيف:",
-      btn_create_tile: "إضافة الرمز"
+      btn_create_tile: "إضافة الرمز",
+
+      // Week 2: Speech feature-detection + timetable modal + persistence
+      stt_unsupported: "الإملاء الصوتي غير متاح في هذا المتصفح. يمكنك الكتابة بدلاً من ذلك.",
+      tts_no_voices: "تحويل النص إلى كلام غير متاح على هذا الجهاز.",
+      modal_add_period_title: "➕ إضافة حصة جديدة",
+      label_period_name: "اسم الحصة:",
+      label_period_start: "وقت البداية:",
+      label_period_end: "وقت النهاية:",
+      btn_add_period_submit: "إضافة إلى الجدول",
+      error_period_overlap: "هذا الوقت يتعارض مع حصة أخرى.",
+      error_period_order: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+      error_period_name: "الرجاء إدخال اسم الحصة.",
+      error_period_times: "الرجاء تحديد وقت البداية والنهاية.",
+      auditor_features_ok: "جميع ميزات المتصفح متاحة.",
+      auditor_features_deg: "بعض الميزات غير متاحة في هذا المتصفح (انظر التفاصيل)."
     }
   },
 
@@ -290,7 +331,6 @@ const i18n = {
     document.documentElement.lang = lang;
     document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
 
-    // Update text elements with data-i18n
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(el => {
       const key = el.getAttribute('data-i18n');
@@ -299,13 +339,11 @@ const i18n = {
       }
     });
 
-    // Update Language Indicator text
     const langIndicator = document.getElementById('lang-indicator');
     if (langIndicator) {
       langIndicator.textContent = (lang === 'ar') ? 'English' : 'العربية';
     }
 
-    // Dispatch language change event for other modules
     window.dispatchEvent(new CustomEvent('app-lang-changed', { detail: { lang } }));
   },
 

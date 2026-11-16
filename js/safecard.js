@@ -2,6 +2,7 @@
  * Sanad - Safe Passage & Personal Emergency Card Module
  * High-visibility ID for non-verbal or stressful moments, emergency chimes,
  * customizable student details, Father and Mother contact cards.
+ * Week 1 a11y patch: privacy banner + wipe-data button.
  */
 
 const safecardModule = {
@@ -9,9 +10,9 @@ const safecardModule = {
     name: "زيد المنصوري",
     school: "أكاديمية النور | الصف الخامس",
     father_name: "طارق المنصوري",
-    father_phone: "+971509876543",
-    mother_name: "فاطمة الزهراء",
-    mother_phone: "+971501234567",
+    father_phone: "+971500000000",
+    mother_name: "فاطمة",
+    mother_phone: "+971500000000",
     help: "• أتواصل بشكل أفضل باستخدام البطاقات البصرية أو الجمل القصيرة والهادئة.\n• الأصوات العالية أو الزحام المفاجئ قد يسبب لي توتراً حسياً. أرجو إعطائي دقيقتين في مكان هادئ.\n• إذا كنت تائهاً، أرجو مساعدتي بالاتصال بوالديّ فوراً على الأرقام أدناه.",
     medical: "حساسية: الفول السوداني. يستخدم سماعات عازلة للضوضاء في البيئات الصاخبة."
   },
@@ -34,11 +35,15 @@ const safecardModule = {
         // Migration if legacy keys exist
         if (parsed.contact1_phone && !parsed.mother_phone) {
           parsed.mother_phone = parsed.contact1_phone;
-          parsed.mother_name = parsed.contact1_name ? parsed.contact1_name.replace(/Mother:?\s*/i, '').replace(/الأم:?\s*/i, '') : "فاطمة الزهراء";
+          parsed.mother_name = parsed.contact1_name
+            ? parsed.contact1_name.replace(/Mother:?\s*/i, '').replace(/الأم:?\s*/i, '')
+            : "فاطمة الزهراء";
         }
         if (parsed.contact2_phone && !parsed.father_phone) {
           parsed.father_phone = parsed.contact2_phone;
-          parsed.father_name = parsed.contact2_name ? parsed.contact2_name.replace(/Father:?\s*/i, '').replace(/الأب:?\s*/i, '') : "طارق المنصوري";
+          parsed.father_name = parsed.contact2_name
+            ? parsed.contact2_name.replace(/Father:?\s*/i, '').replace(/الأب:?\s*/i, '')
+            : "طارق المنصوري";
         }
         this.profile = { ...this.profile, ...parsed };
       }
@@ -122,8 +127,8 @@ const safecardModule = {
     if (btnLoudChime) {
       btnLoudChime.addEventListener('click', () => {
         speechEngine.playEmergencyChime();
-        speechEngine.speak(i18n.currentLang === 'ar' 
-          ? "أنا بحاجة إلى مساعدة، يرجى الاطلاع على بطاقة الهوية الآمنة" 
+        speechEngine.speak(i18n.currentLang === 'ar'
+          ? "أنا بحاجة إلى مساعدة، يرجى الاطلاع على بطاقة الهوية الآمنة"
           : "I need assistance, please look at my Safe ID Card");
       });
     }
@@ -189,6 +194,38 @@ const safecardModule = {
         this.renderCard();
         speechEngine.playSuccessChime();
         closeModal();
+      });
+    }
+
+    // Week 1 a11y patch: wipe-data button
+    const btnWipe = document.getElementById('btn-wipe-data');
+    if (btnWipe) {
+      btnWipe.addEventListener('click', () => {
+        const isAr = i18n.currentLang === 'ar';
+        const msg = isAr
+          ? 'سيتم حذف جميع بيانات البطاقة والبطاقات المخصصة من هذا المتصفح نهائياً. هل أنت متأكد؟'
+          : 'This will permanently delete the Safe Card, custom AAC tiles, and all settings from this browser. Continue?';
+        if (!window.confirm(msg)) return;
+
+        const n = (typeof SanadPrivacy !== 'undefined') ? SanadPrivacy.wipeAll() : 0;
+
+        this.profile = {
+          name: isAr ? "زيد المنصوري" : "Zaid Al-Mansouri",
+          school: isAr ? "أكاديمية النور | الصف الخامس" : "Al Noor Academy | Grade 5",
+          father_name: isAr ? "طارق المنصوري" : "Tariq Al-Mansouri",
+          father_phone: "+971509876543",
+          mother_name: isAr ? "فاطمة الزهراء" : "Fatima Al-Zahra",
+          mother_phone: "+971501234567",
+          help: "",
+          medical: ""
+        };
+        this.renderCard();
+
+        const done = isAr
+          ? `تم حذف ${n} عنصر بيانات. تم إعادة التعيين.`
+          : `Deleted ${n} stored item(s). Reset to defaults.`;
+        const sr = document.getElementById('sr-alert');
+        if (sr) sr.textContent = done;
       });
     }
   }

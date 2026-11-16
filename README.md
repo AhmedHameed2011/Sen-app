@@ -2,7 +2,7 @@
 > **Empowering students with determination inside school and in real life.**
 
 [![Live Demo](https://img.shields.io/badge/Production-Live%20on%20Vercel-success)](https://sanad-determination-app.vercel.app)
-[![WCAG 2.2 AAA](https://img.shields.io/badge/WCAG%202.2-AAA%20Compliant-success)](#)
+[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG%202.2-AA%20%2B%20AAA%20contrast%20modes-success)](#)
 [![A11y Verified](https://img.shields.io/badge/Accessibility-Chrome%20DevTools%20Audited-blue)](#)
 [![Bilingual](https://img.shields.io/badge/Language-English%20%7C%20العربية-purple)](#)
 [![Offline Ready](https://img.shields.io/badge/PWA-100%25%20Offline-green)](#)
@@ -69,6 +69,7 @@ The application bridges the gap between **academic classroom life** and **real-w
 * **Caregiver Speed Dial**: Direct one-tap phone links.
 * **Emergency Alert Chime**: Noticeable non-scary chime for seeking attention.
 * **Full-Screen Presenter Mode**: Hold up the tablet/phone screen to communicate critical details.
+* **Privacy-First Storage**: All data stays in the browser's local storage. One-tap "Wipe my data" button clears everything. Nothing is ever sent to a server.
 
 ### 🔍 6. Chrome DevTools & WCAG 2.2 Live Auditor
 * Built-in accessibility auditing engine inspired by Chrome DevTools and Lighthouse:
@@ -83,60 +84,28 @@ The application bridges the gap between **academic classroom life** and **real-w
 ## ♿ Accessibility First Features
 
 * **Multi-Theme Support**:
-  1. *Calm Modern* (Default soft aesthetic)
-  2. *High-Contrast Dark* (OLED pure black)
-  3. *High-Contrast Light* (True black and white >= 21:1)
-  4. *Yellow on Black* (Classic optometry low-vision mode)
-  5. *Sensory Pastel* (Low-saturation, muted anti-fatigue mode)
+  1. *Calm Modern* (Default soft aesthetic — passes WCAG AA on all body text)
+  2. *High-Contrast Dark* (OLED pure black — AAA)
+  3. *High-Contrast Light* (True black and white ≥ 21:1 — AAA)
+  4. *Yellow on Black* (Classic optometry low-vision mode — AAA)
+  5. *Sensory Pastel* (Low-saturation, muted anti-fatigue mode — AA)
 * **Dyslexia-Optimized Typography Toggle**: Enhances letter spacing, word spacing, and line height.
 * **Text Scaler**: Scale font size seamlessly from 14px to 28px without breaking layouts.
 * **Hover-to-Read (Voice Assist)**: Automatically speaks buttons and cards out loud when hovered or focused.
 * **Bilingual Support (English & العربية)**: Complete interface and speech localization with seamless RTL layout switching.
-* **Touch-Friendly Tap Targets**: All buttons are strictly >= 48x48px per WCAG / web.dev standards.
-* **Keyboard Navigation**: Skip links, logical tab order, and prominent focus indicators.
+* **Touch-Friendly Tap Targets**: All buttons are strictly ≥ 48x48px per WCAG / web.dev standards.
+* **Keyboard Navigation**: Skip links, logical tab order, arrow-key navigation in tab groups, and prominent focus indicators.
+* **Reduced Motion Support**: All non-essential motion respects `prefers-reduced-motion`. The breathing exercise swaps scale animation for an opacity pulse so the feature remains usable for vestibular-sensitive users.
+* **Screen Reader Live Regions**: Dedicated polite/assertive live regions for navigation changes and AAC tile additions; whole-sentence announcements are available on explicit "Speak" action only.
 
 ---
 
 ## 💻 How to Run
 
 ### Method 1: Open Directly in Any Browser
-Simply double-click or open `index.html` in your browser (Google Chrome, Microsoft Edge, Safari, or Firefox):
+Simply double-click or open `index.html` in your browser:
 ```bash
-# Path to open:
-C:\Users\METJAR TAQNI\.gemini\antigravity\scratch\sanad-determination-app\index.html
-```
-
-### Method 2: Run via Node.js Server
-From the project folder:
-```bash
-npm start
-# or
-node server.js
-```
-Then visit `http://localhost:3300` in your web browser.
-
----
-
-## 📁 File Structure
-
-```
-sanad-determination-app/
-├── index.html          # Semantic HTML5 with ARIA landmarks & modal dialogs
-├── manifest.json       # PWA manifest for offline installation
-├── sw.js               # Service Worker for 100% offline asset caching
-├── package.json        # Project metadata and run scripts
-├── server.js           # Lightweight zero-dependency HTTP server with auto-port fallback
-├── README.md           # Documentation and guide
-├── css/
-│   └── styles.css      # WCAG AAA styles, responsive grids, & themes
-└── js/
-    ├── app.js          # Master orchestrator & navigation manager
-    ├── i18n.js         # English & Arabic bilingual dictionary
-    ├── speech.js       # Web Speech (TTS & STT) & procedural chimes
-    ├── school.js       # Timetable, discreet cards, & task chunker
-    ├── life.js         # Social stories, money helper, & hydration tracker
-    ├── aac.js          # Communication symbol board & sentence builder
-    ├── calm.js         # Breathing bubble, brown noise synth, & mood zones
-    ├── safecard.js     # Personal emergency ID card & alert chime
-    └── auditor.js      # Chrome DevTools & WCAG 2.2 live DOM auditing engine
-```
+# From the project root:
+open index.html        # macOS
+start index.html       # Windows
+xdg-open index.html    # Linux
