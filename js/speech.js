@@ -87,9 +87,8 @@ const speechEngine = {
    * Speak text out loud. Silently no-ops if TTS is unavailable
    * (rather than alerting — better for AAC context).
    */
-  speak(text, onEnd) {
+   speak(text, onEnd) {
     if (!this.support.tts || !this.synth) {
-      // Graceful no-op — announce to screen reader only
       this._announce('Text to speech is unavailable on this device.');
       return;
     }
@@ -114,10 +113,31 @@ const speechEngine = {
     utterance.lang = isArabic ? 'ar-SA' : 'en-US';
 
     if (voices && voices.length > 0) {
-      const targetVoice = voices.find(v =>
-        isArabic ? v.lang.startsWith('ar') : v.lang.startsWith('en')
-      );
-      if (targetVoice) utterance.voice = targetVoice;
+      let targetVoice = null;
+
+      if (isArabic) {
+        // 1. البحث عن أصوات عربية أنثوية معروفة
+        const femaleArabicNames = ['zariyah', 'hoda', 'laila', 'salma', 'sana', 'amany', 'iman', 'mariam', 'rana'];
+        targetVoice = voices.find(v => 
+          v.lang.startsWith('ar') && femaleArabicNames.some(name => v.name.toLowerCase().includes(name))
+        );
+        // 2. إذا لم يوجد، نبحث عن أي صوت عربي
+        if (!targetVoice) targetVoice = voices.find(v => v.lang.startsWith('ar'));
+      } else {
+        // 1. البحث عن أصوات إنجليزية أنثوية معروفة
+        const femaleEnglishNames = ['samantha', 'zira', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'google uk english female', 'google us english'];
+        targetVoice = voices.find(v => 
+          v.lang.startsWith('en') && femaleEnglishNames.some(name => v.name.toLowerCase().includes(name))
+        );
+        // 2. إذا لم يوجد، نبحث عن أي صوت إنجليزي أنثوي (يحتوي على كلمة female)
+        if (!targetVoice) targetVoice = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'));
+        // 3. إذا لم يوجد، نأخذ أي صوت إنجليزي
+        if (!targetVoice) targetVoice = voices.find(v => v.lang.startsWith('en'));
+      }
+
+      if (targetVoice) {
+        utterance.voice = targetVoice;
+      }
     }
 
     if (onEnd) utterance.onend = onEnd;
@@ -127,7 +147,8 @@ const speechEngine = {
     } catch (e) {
       console.warn('[speechEngine] speak() failed', e);
     }
-  },
+  }
+  ,
 
   stopSpeaking() {
     if (this.synth) this.synth.cancel();
