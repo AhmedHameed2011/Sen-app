@@ -1838,3 +1838,105 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+/* ==========================================================================
+   Mobile UI Fixes (Responsive Adjustments)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* 1. Fix the Header Toolbar (A11y Quickbar) */
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .a11y-quickbar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for tools */
+    gap: 0.5rem;
+  }
+
+  .a11y-quickbar .tool-btn,
+  .a11y-quickbar select {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* 2. Fix Navigation Tabs */
+  .nav-list {
+    padding: 0.5rem 0;
+  }
+  
+  .nav-item {
+    min-width: 80px; /* Smaller tab widths to fit more */
+  }
+
+  .nav-link {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+  }
+
+  /* 3. Fix Discreet Teacher Cards (Make them 2 columns on mobile) */
+  .discreet-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important; /* Force 2 columns */
+    gap: 1rem;
+  }
+
+  .discreet-btn {
+    min-height: 120px;
+    padding: 1rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .discreet-btn .icon-large {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* 4. Fix AAC Grid (Make tiles 3 columns) */
+  .aac-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.75rem;
+  }
+
+  .aac-tile {
+    min-height: 90px;
+    padding: 0.5rem;
+  }
+
+  .aac-tile .tile-icon {
+    font-size: 1.8rem;
+  }
+
+  .aac-tile .tile-label {
+    font-size: 0.85rem;
+  }
+
+  /* 5. Fix Timetable & Task Chunking */
+  .grid-2 {
+    grid-template-columns: 1fr !important; /* Stack them vertically */
+  }
+
+  /* 6. Fix the Safe Card Contacts */
+  .contact-pill {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .contact-call-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Extra small devices (phones, 480px and down) */
+@media (max-width: 480px) {
+  .discreet-cards-grid {
+    grid-template-columns: 1fr !important; /* 1 column for very small screens */
+  }
+}
