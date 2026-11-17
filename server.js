@@ -1,4 +1,129 @@
 const http = require('http');
+const admin = require('firebase-admin');
+const url = require('url');
+const { StringDecoder } = require('string_decoder');
+
+// Initialize Firebase Admin (service account JSON must be placed at ./firebase/serviceAccountKey.json)
+try {
+  const serviceAccount = require('./firebase/serviceAccountKey.json');
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  console.log('✅ Firebase Admin initialized');
+} catch (e) {
+  console.warn('⚠️ Firebase Admin not initialized – ensure serviceAccountKey.json exists');
+}
+
+// Helper to parse JSON body
+function parseJsonBody(req, callback) {
+  const decoder = new StringDecoder('utf-8');
+  let buffer = '';
+  req.on('data', (data) => {
+    buffer += decoder.write(data);
+  });
+  req.on('end', () => {
+    buffer += decoder.end();
+    try {
+      const parsed = buffer ? JSON.parse(buffer) : {};
+      callback(null, parsed);
+    } catch (err) {
+      callback(err);
+    }
+  });
+}
+
+// Simple API router for POST endpoints
+function handleApi(req, res, pathname) {
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+    return;
+  }
+  parseJsonBody(req, (err, data) => {
+    if (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Invalid JSON' }));
+      return;
+    }
+    const db = admin.firestore();
+    if (pathname === '/api/link-parent') {
+      // Expected: { studentId, parentId }
+      const { studentId, parentId } = data;
+      if (!studentId || !parentId) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing studentId or parentId' }));
+        return;
+      }
+      db.collection('students').doc(studentId).set({ parentId }, { merge: true })
+        .then(() => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'linked' }));
+        })
+        .catch((e) => {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: e.message }));
+        });
+    } else if (pathname === '/api/presence') {
+      // Expected: { studentId }
+      const { studentId } = data;
+      if (!studentId) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing studentId' }));
+        return;
+      }
+      const studentRef = db.collection('students').doc(studentId);
+      studentRef.get().then(doc => {
+        const studentData = doc.exists ? doc.data() : {};
+        const timestamp = admin.firestore.FieldValue.serverTimestamp();
+        // Save presence log
+        db.collection('presence').add({ studentId, timestamp })
+          .catch(()=>{});
+        // Notify parent if registered
+        if (studentData.parentId) {
+          db.collection('students').doc(studentId).get().then(stud => {
+            const tokens = stud.data()?.parentTokens || [];
+            if (tokens.length) {
+              const message = {
+                notification: {
+                  title: 'Student Activity',
+                  body: `${studentId} is now active`,
+                },
+                tokens,
+              };
+              admin.messaging().sendMulticast(message).catch(()=>{});
+            }
+          });
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'recorded' }));
+      }).catch(e => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      });
+    } else if (pathname === '/api/register-parent-token') {
+      // Expected: { studentId, parentId, token }
+      const { studentId, parentId, token } = data;
+      if (!studentId || !parentId || !token) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing fields' }));
+        return;
+      }
+      const studentRef = db.collection('students').doc(studentId);
+      studentRef.set({ parentId }, { merge: true })
+        .then(() => studentRef.update({ parentTokens: admin.firestore.FieldValue.arrayUnion(token) }))
+        .then(() => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'token registered' }));
+        })
+        .catch(e => {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: e.message }));
+        });
+    } else {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'API not found' }));
+    }
+  });
+}
+
 const fs = require('fs');
 const path = require('path');
 
@@ -50,6 +175,15 @@ const server = http.createServer((req, res) => {
   }
 
   // 4. Resolve and verify path is inside PUBLIC_DIR
+  // Check for API routes first
+  const parsedUrl = url.parse(req.url, true);
+  if (parsedUrl.pathname.startsWith('/api/')) {
+    handleApi(req, res, parsedUrl.pathname);
+    return;
+  }
+
+
+
   const filePath = path.resolve(PUBLIC_DIR, '.' + path.sep + decoded.replace(/^[\/\\]+/, ''));
   const rel = path.relative(PUBLIC_DIR, filePath);
   if (rel.startsWith('..') || path.isAbsolute(rel)) {

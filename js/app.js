@@ -197,7 +197,16 @@ const app = {
     }
   },
 
-  registerServiceWorker() {
+  // Notify backend that student is active (presence)
+  const studentId = localStorage.getItem('sanad_student_id');
+  if (studentId) {
+    fetch('/api/presence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId })
+    }).catch(() => {});
+  }
+
     // Clear legacy client-side caches
     if ('caches' in window) {
       caches.keys().then(keys => {
