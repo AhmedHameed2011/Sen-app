@@ -23,10 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const docRef = doc(db, "presence", studentId);
+      
       window.unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (data.isOnline) {
+          
+          // حساب الوقت منذ آخر نبضة (آخر تحديث)
+          const lastSeenTime = new Date(data.lastSeen).getTime();
+          const now = new Date().getTime();
+          const diffInSeconds = (now - lastSeenTime) / 1000;
+          
+          // إذا مرت أكثر من 30 ثانية بدون تحديث، نعتبره غير متصل
+          if (data.isOnline && diffInSeconds < 30) {
             statusCard.className = 'status-online';
             statusText.innerHTML = '🟢 الطالب يستخدم التطبيق الآن';
             timeText.textContent = `آخر تحديث: ${new Date(data.lastSeen).toLocaleTimeString('ar-SA')}`;
@@ -40,10 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
           statusText.innerHTML = 'لم يتم العثور على بيانات.';
           timeText.textContent = 'تأكد من أن ابنك أدخل هذا البريد في تطبيقه.';
         }
-      }, (error) => {
-        console.error("Firebase error:", error);
-        statusText.innerHTML = '⚠️ خطأ في الاتصال بقاعدة البيانات.';
-        timeText.textContent = 'تأكد من تفعيل صلاحيات القراءة في Firebase.';
       });
     } catch (error) {
       console.error("Setup error:", error);

@@ -234,24 +234,26 @@ const app = {
     });
   },
 
-  async sendPresenceSignal(email) {
+    async sendPresenceSignal(email) {
     try {
       const { db } = await import('./firebase-config.js');
       const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
       
       const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
       
-      await setDoc(doc(db, "presence", studentId), {
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      }, { merge: true });
-
-      window.addEventListener('beforeunload', async () => {
+      // دالة إرسال الإشارة
+      const updatePresence = async () => {
         await setDoc(doc(db, "presence", studentId), {
-          isOnline: false,
+          isOnline: true,
           lastSeen: new Date().toISOString()
         }, { merge: true });
-      });
+      };
+
+      // إرسال إشارة فورية عند البدء
+      await updatePresence();
+
+      // إرسال إشارة كل 10 ثوانٍ (نبضة قلب)
+      setInterval(updatePresence, 10000);
       
     } catch (error) {
       console.error("Error with Firebase:", error);
