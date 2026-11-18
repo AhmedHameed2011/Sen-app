@@ -1,7 +1,6 @@
 /**
  * Sanad - Master Application Orchestrator
  * Coordinates navigation, accessibility preferences, theme changes, and module bootstrapping.
- * Week 1 a11y patch: nav uses aria-current instead of tab roles; storage keys aligned with privacy.js.
  */
 
 const app = {
@@ -13,6 +12,9 @@ const app = {
     this.setupA11yToolbar();
     this.loadUserPreferences();
     this.registerServiceWorker();
+    
+    // بدء ميزة ولي الأمر
+    this.setupParentLinking();
   },
 
   initModules() {
@@ -30,14 +32,12 @@ const app = {
     const sections = document.querySelectorAll('.app-section');
 
     const switchSection = (targetId) => {
-      // Deactivate all
       navLinks.forEach(link => {
         link.classList.remove('active');
         link.removeAttribute('aria-current');
       });
       sections.forEach(sec => sec.classList.remove('active'));
 
-      // Find active link and section
       const activeLink = document.querySelector(`.nav-link[href="#${targetId}"]`);
       const activeSection = document.getElementById(`section-${targetId}`);
 
@@ -46,14 +46,11 @@ const app = {
         activeLink.setAttribute('aria-current', 'page');
         activeSection.classList.add('active');
 
-        // Announce section change to screen readers (defer to let DOM settle)
         const announcer = document.getElementById('sr-announcer');
         if (announcer) {
           const lang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'en';
           const label = activeLink.innerText.trim();
-          announcer.textContent = lang === 'ar'
-            ? `تم الانتقال إلى ${label}`
-            : `Navigated to ${label}`;
+          announcer.textContent = lang === 'ar' ? `تم الانتقال إلى ${label}` : `Navigated to ${label}`;
         }
       }
     };
@@ -62,21 +59,17 @@ const app = {
       link.addEventListener('click', (e) => {
         const hash = link.getAttribute('href').replace('#', '');
         switchSection(hash);
-        // Do NOT preventDefault — allow anchor hash update for back/forward
       });
     });
 
-    // Check initial URL hash
     const initialHash = window.location.hash.replace('#', '') || 'school';
     switchSection(initialHash);
 
-    // Support browser back/forward buttons
     window.addEventListener('hashchange', () => {
       const hash = window.location.hash.replace('#', '') || 'school';
       switchSection(hash);
     });
 
-    // SOS quick button in header
     const btnSos = document.getElementById('btn-quick-sos');
     if (btnSos) {
       btnSos.addEventListener('click', () => {
@@ -88,7 +81,6 @@ const app = {
   },
 
   setupA11yToolbar() {
-    // 1. Font Size Scaling
     const btnFontInc = document.getElementById('btn-font-inc');
     const btnFontDec = document.getElementById('btn-font-dec');
 
@@ -110,21 +102,18 @@ const app = {
       });
     }
 
-    // 2. High Contrast Theme Selector
     const selectTheme = document.getElementById('select-theme');
     if (selectTheme) {
       selectTheme.addEventListener('change', () => {
         const theme = selectTheme.value;
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('sanad_theme', theme);
-        // Trigger auditor update
         if (typeof auditorModule !== 'undefined' && auditorModule && typeof auditorModule.runAudit === 'function') {
           auditorModule.runAudit();
         }
       });
     }
 
-    // 3. Dyslexia Font Toggle
     const btnDyslexic = document.getElementById('btn-dyslexic-font');
     if (btnDyslexic) {
       btnDyslexic.addEventListener('click', () => {
@@ -136,7 +125,6 @@ const app = {
       });
     }
 
-    // 4. Voice Assist / Hover-to-Read Toggle
     const btnHoverSpeech = document.getElementById('btn-hover-speech');
     if (btnHoverSpeech) {
       btnHoverSpeech.addEventListener('click', () => {
@@ -148,7 +136,6 @@ const app = {
       });
     }
 
-    // 5. Language Switcher (EN / AR)
     const btnLang = document.getElementById('btn-lang-toggle');
     if (btnLang) {
       btnLang.addEventListener('click', () => {
@@ -161,20 +148,16 @@ const app = {
 
   applyFontSize() {
     document.documentElement.style.setProperty('--font-base-size', `${this.currentFontSize}px`);
-    // NOTE: This key is deliberately distinct from 'sanad_font_scale' (used by
-    // privacy.js for the concept of a scale multiplier); here we persist the raw px value.
     localStorage.setItem('sanad_font_size', this.currentFontSize);
   },
 
   loadUserPreferences() {
-    // Font size
     const savedFontSize = localStorage.getItem('sanad_font_size');
     if (savedFontSize) {
       this.currentFontSize = parseInt(savedFontSize);
       this.applyFontSize();
     }
 
-    // Theme
     const savedTheme = localStorage.getItem('sanad_theme');
     const selectTheme = document.getElementById('select-theme');
     if (savedTheme && selectTheme) {
@@ -182,7 +165,6 @@ const app = {
       selectTheme.value = savedTheme;
     }
 
-    // Dyslexic Font
     const savedDyslexic = localStorage.getItem('sanad_dyslexic') === 'true';
     const btnDyslexic = document.getElementById('btn-dyslexic-font');
     if (savedDyslexic && btnDyslexic) {
@@ -190,29 +172,17 @@ const app = {
       btnDyslexic.setAttribute('aria-pressed', 'true');
     }
 
-    // Language
     const savedLang = localStorage.getItem('sanad_lang');
     if (savedLang) {
       i18n.setLanguage(savedLang);
     }
   },
 
-  // Notify backend that student is active (presence)
-  const studentId = localStorage.getItem('sanad_student_id');
-  if (studentId) {
-    fetch('/api/presence', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId })
-    }).catch(() => {});
-  }
-
-    // Clear legacy client-side caches
+  registerServiceWorker() {
     if ('caches' in window) {
       caches.keys().then(keys => {
         keys.forEach(k => {
-          if (k !== 'sanad-v5-realtime') {
-            console.log('Purging legacy cache:', k);
+          if (k !== 'sanad-v6-realtime') {
             caches.delete(k);
           }
         });
@@ -220,11 +190,9 @@ const app = {
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=5').then(reg => {
-        reg.update(); // Trigger immediate background update check
-      }).catch(err => {
-        // Safe to ignore in sandbox or file protocol
-      });
+      navigator.serviceWorker.register('sw.js?v=6').then(reg => {
+        reg.update();
+      }).catch(err => {});
 
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -234,10 +202,63 @@ const app = {
         }
       });
     }
+  },
+
+  // ==========================================
+  // ميزة ولي الأمر (Parent Linking)
+  // ==========================================
+  setupParentLinking() {
+    const btn = document.getElementById('btn-link-parent');
+    const input = document.getElementById('parent-email-input');
+    const msg = document.getElementById('link-status-msg');
+
+    if (!btn || !input) return;
+
+    const savedEmail = localStorage.getItem('parent_email');
+    if (savedEmail) {
+      input.value = savedEmail;
+      this.sendPresenceSignal(savedEmail);
+    }
+
+    btn.addEventListener('click', async () => {
+      const email = input.value.trim().toLowerCase();
+      if (!email) return;
+
+      localStorage.setItem('parent_email', email);
+      if(msg) {
+        msg.textContent = "✅ تم ربط الحساب بنجاح!";
+        msg.style.color = "green";
+      }
+      
+      this.sendPresenceSignal(email);
+    });
+  },
+
+  async sendPresenceSignal(email) {
+    try {
+      const { db } = await import('./firebase-config.js');
+      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+      
+      const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
+      
+      await setDoc(doc(db, "presence", studentId), {
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      }, { merge: true });
+
+      window.addEventListener('beforeunload', async () => {
+        await setDoc(doc(db, "presence", studentId), {
+          isOnline: false,
+          lastSeen: new Date().toISOString()
+        }, { merge: true });
+      });
+      
+    } catch (error) {
+      console.error("Error with Firebase:", error);
+    }
   }
 };
 
-// Start application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   app.init();
 });
