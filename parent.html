@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanad | لوحة ولي الأمر</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: var(--bg-primary); padding: 1rem; }
+    .parent-container { width: 100%; max-width: 500px; background: var(--bg-surface); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 2px solid var(--border-subtle); }
+    h1 { color: var(--accent-blue); font-size: 1.8rem; margin-bottom: 0.5rem; text-align: center; }
+    p.desc { color: var(--text-secondary); text-align: center; margin-bottom: 2rem; font-size: 1rem; }
+    .input-group { margin-bottom: 1.5rem; }
+    label { display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary); }
+    input { width: 100%; padding: 1rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem; font-family: inherit; background: var(--bg-surface); color: var(--text-primary); }
+    input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(7, 89, 133, 0.2); }
+    button { width: 100%; padding: 1rem; border-radius: var(--radius-md); border: none; background: var(--accent-blue); color: #fff; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.2s; min-height: 48px; }
+    button:hover { background: var(--accent-blue-hover); }
+    #status-card { display: none; margin-top: 2rem; padding: 1.5rem; border-radius: var(--radius-md); background: var(--bg-surface-hover); border-right: 6px solid var(--text-muted); text-align: center; }
+    .status-online { border-right-color: var(--accent-green) !important; background: var(--accent-green-light) !important; }
+    .status-offline { border-right-color: var(--accent-rose) !important; background: var(--accent-rose-light) !important; }
+    .status-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .status-time { font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; }
+    .back-link { display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="parent-container">
+    <h1>👋 لوحة ولي الأمر</h1>
+    <p class="desc">أدخل البريد الإلكتروني الذي قمت بربطه في تطبيق ابنك لمتابعة نشاطه.</p>
+    
+    <div class="input-group">
+      <label for="parentEmail">البريد الإلكتروني:</label>
+      <input type="email" id="parentEmail" placeholder="example@email.com">
+    </div>
+    
+    <button id="btnCheck">متابعة حالة الطالب</button>
+
+    <div id="status-card">
+      <div class="status-title" id="statusText">جاري التحقق...</div>
+      <div class="status-time" id="timeText"></div>
+    </div>
+
+    <a href="index.html" class="back-link">← العودة إلى تطبيق الطالب</a>
+  </div>
+
+  <script type="module" src="js/parent.js"></script>
+</body>
+</html>

@@ -23,6 +23,7 @@
   "author": "Antigravity",
   "license": "MIT",
   "dependencies": {
+    "firebase": "^13.4.0",
     "firebase-admin": "^12.7.0"
   },
   "engines": {
