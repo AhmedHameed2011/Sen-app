@@ -8,17 +8,17 @@
   <meta name="theme-color" content="#0369a1">
 
   <!-- Web App Manifest for PWA & Offline Support -->
-  <link rel="manifest" href="manifest.json?v=5">
+  <link rel="manifest" href="manifest.json?v=6">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>">
 
-  <!-- Week 2: iOS PWA meta + touch icons -->
+  <!-- iOS PWA meta + touch icons -->
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Sanad">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/styles.css?v=5">
+  <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body data-theme="default" data-dyslexic="false">
 
@@ -75,7 +75,7 @@
       </aside>
     </div>
 
-    <!-- Primary Navigation (Week 1 patch: plain nav links, no tab roles) -->
+    <!-- Primary Navigation -->
     <nav class="app-nav" aria-label="Primary Application Navigation">
       <ul class="nav-list">
         <li class="nav-item">
@@ -208,7 +208,6 @@
             </label>
           </div>
 
-          <!-- Week 2: shown when SpeechRecognition is unavailable -->
           <p id="stt-unsupported-hint" class="form-hint" hidden data-i18n="stt_unsupported">
             Voice dictation isn't available in this browser. You can type instead.
           </p>
@@ -318,7 +317,6 @@
         </div>
       </div>
 
-      <!-- Sentence Strip (Week 1 patch: live region moved out) -->
       <div class="aac-sentence-strip" role="region" aria-label="Sentence Builder Strip">
         <div id="aac-tiles-stream" class="aac-tiles-stream">
           <span id="aac-empty-placeholder" style="color: var(--text-muted); font-style: italic; font-size: 1.05rem;" data-i18n="sentence_empty_hint">
@@ -338,7 +336,6 @@
         </div>
       </div>
 
-      <!-- Week 1 a11y patch: dedicated live region for tile-add events -->
       <div id="aac-live-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
       <div class="aac-categories-tabs" role="tablist" aria-label="Symbol Categories">
@@ -561,7 +558,24 @@
         </div>
       </div>
 
-      <!-- Week 1 a11y patch: privacy banner + wipe -->
+      <!-- قسم ربط ولي الأمر -->
+      <div class="card" style="margin-top: 2rem; max-width: 720px; margin-left: auto; margin-right: auto;">
+        <h3 class="card-title" style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+          <span aria-hidden="true">👨‍👩‍👦</span> <span data-i18n="parent_link_title">ربط حساب ولي الأمر</span>
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;" data-i18n="parent_link_desc">
+          أدخل بريد ولي الأمر الإلكتروني ليتمكن من متابعة نشاطك على التطبيق ومعرفة أنك متصل الآن.
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="email" id="parent-email-input" placeholder="البريد الإلكتروني لولي الأمر" style="flex: 1; min-width: 200px; min-height: 48px; padding: 0.5rem 1rem; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); font-size: 1rem; font-family: inherit;" aria-label="Parent Email Address">
+          <button id="btn-link-parent" class="tool-btn" style="background: var(--accent-blue); color: #fff; font-weight: 700; padding: 0 1.5rem; min-height: 48px;">
+            <span aria-hidden="true">🔗</span> <span data-i18n="parent_link_btn">ربط الحساب</span>
+          </button>
+        </div>
+        <p id="link-status-msg" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: 700; color: var(--accent-green);"></p>
+      </div>
+
+      <!-- تحذير الخصوصية -->
       <div class="privacy-banner" role="note" aria-label="Privacy notice">
         <p>
           <strong data-i18n="privacy_title">🔒 Your data stays on this device.</strong>
@@ -744,7 +758,7 @@
     </div>
   </div>
 
-  <!-- 4. Add Class Period Modal (Week 2) -->
+  <!-- 4. Add Class Period Modal -->
   <div id="modal-add-period" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="period-modal-title" aria-hidden="true">
     <div class="modal-content">
       <button class="modal-close-btn" id="btn-close-period-modal" aria-label="Close add period dialog">✕</button>
@@ -776,15 +790,15 @@
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=5"></script>
-  <script src="js/privacy.js?v=5"></script>
-  <script src="js/speech.js?v=5"></script>
-  <script src="js/school.js?v=5"></script>
-  <script src="js/life.js?v=5"></script>
-  <script src="js/aac.js?v=5"></script>
-  <script src="js/calm.js?v=5"></script>
-  <script src="js/safecard.js?v=5"></script>
-  <script src="js/auditor.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/i18n.js?v=6"></script>
+  <script src="js/privacy.js?v=6"></script>
+  <script src="js/speech.js?v=6"></script>
+  <script src="js/school.js?v=6"></script>
+  <script src="js/life.js?v=6"></script>
+  <script src="js/aac.js?v=6"></script>
+  <script src="js/calm.js?v=6"></script>
+  <script src="js/safecard.js?v=6"></script>
+  <script src="js/auditor.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>
