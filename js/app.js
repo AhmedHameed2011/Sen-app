@@ -234,26 +234,39 @@ const app = {
     });
   },
 
-    async sendPresenceSignal(email) {
+      async sendPresenceSignal(email) {
     try {
       const { db } = await import('./firebase-config.js');
       const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
       
       const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
       
-      // دالة إرسال الإشارة
-      const updatePresence = async () => {
+      const updatePresence = async (isOnline) => {
         await setDoc(doc(db, "presence", studentId), {
-          isOnline: true,
+          isOnline: isOnline,
           lastSeen: new Date().toISOString()
         }, { merge: true });
       };
 
-      // إرسال إشارة فورية عند البدء
-      await updatePresence();
+      // 1. إرسال إشارة "متصل" عند البدء
+      await updatePresence(true);
 
-      // إرسال إشارة كل 10 ثوانٍ (نبضة قلب)
-      setInterval(updatePresence, 10000);
+      // 2. إرسال إشارة "متصل" كل 10 ثوانٍ (للتأكد)
+      setInterval(() => updatePresence(true), 10000);
+
+      // 3. إرسال إشارة "غير متصل" فوراً عند إغلاق التبويب أو الخروج
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          updatePresence(false);
+        } else {
+          updatePresence(true);
+        }
+      });
+
+      // 4. محاولة إرسال إشارة "غير متصل" عند الإغلاق التام
+      window.addEventListener('beforeunload', () => {
+        updatePresence(false);
+      });
       
     } catch (error) {
       console.error("Error with Firebase:", error);
