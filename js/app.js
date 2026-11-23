@@ -1,10 +1,12 @@
 /**
  * Sanad - Master Application Orchestrator
  * Coordinates navigation, accessibility preferences, theme changes, and module bootstrapping.
+ * Includes Parent Linking & Presence Signaling.
  */
 
 const app = {
   currentFontSize: 18,
+  presenceIntervalId: null, // لتخزين مؤقت نبضات القلب
 
   init() {
     this.initModules();
@@ -13,7 +15,7 @@ const app = {
     this.loadUserPreferences();
     this.registerServiceWorker();
     
-    // بدء ميزة ولي الأمر
+    // بدء ميزة ولي الأمر (فقط إذا كان البريد محفوظاً)
     this.setupParentLinking();
   },
 
@@ -205,7 +207,7 @@ const app = {
   },
 
   // ==========================================
-  // ميزة ولي الأمر (Parent Linking)
+  // ميزة ولي الأمر (Parent Linking & Presence)
   // ==========================================
   setupParentLinking() {
     const btn = document.getElementById('btn-link-parent');
@@ -214,10 +216,12 @@ const app = {
 
     if (!btn || !input) return;
 
+    // تحميل البريد المحفوظ مسبقاً
     const savedEmail = localStorage.getItem('parent_email');
     if (savedEmail) {
       input.value = savedEmail;
-      this.sendPresenceSignal(savedEmail);
+      // إذا كان البريد محفوظاً، نبدأ إرسال نبضات القلب فوراً
+      this.startPresenceHeartbeat(savedEmail);
     }
 
     btn.addEventListener('click', async () => {
@@ -227,49 +231,62 @@ const app = {
       localStorage.setItem('parent_email', email);
       if(msg) {
         msg.textContent = "✅ تم ربط الحساب بنجاح!";
-        msg.style.color = "green";
+        msg.style.color = "var(--accent-green)";
       }
       
-      this.sendPresenceSignal(email);
+      // إيقاف أي مؤقت سابق ثم بدء نبضات جديدة
+      this.stopPresenceHeartbeat();
+      this.startPresenceHeartbeat(email);
     });
   },
 
-      async sendPresenceSignal(email) {
-    try {
-      const { db } = await import('./firebase-config.js');
-      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-      
-      const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
-      
-      const updatePresence = async (isOnline) => {
+  // دالة بدء إرسال الإشارات (نبضات القلب)
+  startPresenceHeartbeat(email) {
+    this.stopPresenceHeartbeat(); // منع التكرار
+    
+    const sendSignal = async (isOnline) => {
+      try {
+        const { db } = await import('./firebase-config.js');
+        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        
+        const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
+        
         await setDoc(doc(db, "presence", studentId), {
           isOnline: isOnline,
           lastSeen: new Date().toISOString()
         }, { merge: true });
-      };
+        
+      } catch (error) {
+        console.error("Error with Firebase:", error);
+      }
+    };
 
-      // 1. إرسال إشارة "متصل" عند البدء
-      await updatePresence(true);
+    // 1. إرسال إشارة "متصل" فوراً
+    sendSignal(true);
 
-      // 2. إرسال إشارة "متصل" كل 10 ثوانٍ (للتأكد)
-      setInterval(() => updatePresence(true), 10000);
+    // 2. إرسال إشارة "متصل" كل 10 ثوانٍ (نبضة قلب)
+    this.presenceIntervalId = setInterval(() => sendSignal(true), 10000);
 
-      // 3. إرسال إشارة "غير متصل" فوراً عند إغلاق التبويب أو الخروج
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-          updatePresence(false);
-        } else {
-          updatePresence(true);
-        }
-      });
+    // 3. إرسال إشارة "غير متصل" عند إغلاق التبويب أو الخروج
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        sendSignal(false);
+      } else {
+        sendSignal(true);
+      }
+    });
 
-      // 4. محاولة إرسال إشارة "غير متصل" عند الإغلاق التام
-      window.addEventListener('beforeunload', () => {
-        updatePresence(false);
-      });
-      
-    } catch (error) {
-      console.error("Error with Firebase:", error);
+    // 4. محاولة إرسال إشارة "غير متصل" عند الإغلاق التام
+    window.addEventListener('beforeunload', () => {
+      sendSignal(false);
+    });
+  },
+
+  // دالة إيقاف المؤقت
+  stopPresenceHeartbeat() {
+    if (this.presenceIntervalId) {
+      clearInterval(this.presenceIntervalId);
+      this.presenceIntervalId = null;
     }
   }
 };

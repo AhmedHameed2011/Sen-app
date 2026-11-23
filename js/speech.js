@@ -3,6 +3,9 @@
  * Web Speech Synthesis (TTS), Web Speech Recognition (STT), & UI Audio Feedback.
  * Week 2 patch: feature detection, graceful STT/TTS degradation,
  * hover-to-read scoped to hover-capable devices, voice warm-up.
+ * 
+ * UPDATE: AudioContext initialization is deferred to prevent background heartbeat sounds.
+ * TTS (speak) remains fully functional.
  */
 
 // Feature detection run once at module load
@@ -30,28 +33,34 @@ const speechEngine = {
   isRecognizing: false,
   hoverReadEnabled: false,
   speechRate: 1.0,
-  audioCtx: null,
+  audioCtx: null, // لن يتم إنشاؤه إلا عند الحاجة (Lazy Init)
   _voicesLoaded: false,
   _pendingSpeak: null,
 
   init() {
-    this.initAudioContext();
+    // 🛑 لا نقوم باستدعاء initAudioContext هنا لمنع أصوات الخلفية
+    // this.initAudioContext(); 
     this.initVoices();
     this.initRecognition();
     this.setupHoverReader();
   },
 
-  initAudioContext() {
-    if (!this.support.audio) {
-      console.info('[speechEngine] Web Audio unavailable — chimes disabled.');
-      return;
+  /**
+   * دالة إنشاء AudioContext (تُستدعى فقط عند الحاجة لصوت طوارئ)
+   */
+  ensureAudioContext() {
+    if (!this.support.audio) return;
+    if (!this.audioCtx) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.audioCtx = new AudioContext();
+      } catch (e) {
+        console.warn('[speechEngine] AudioContext creation failed', e);
+        this.audioCtx = null;
+      }
     }
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioCtx = new AudioContext();
-    } catch (e) {
-      console.warn('[speechEngine] AudioContext creation failed', e);
-      this.audioCtx = null;
+    if (this.audioCtx && this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
     }
   },
 
@@ -87,7 +96,7 @@ const speechEngine = {
    * Speak text out loud. Silently no-ops if TTS is unavailable
    * (rather than alerting — better for AAC context).
    */
-   speak(text, onEnd) {
+  speak(text, onEnd) {
     if (!this.support.tts || !this.synth) {
       this._announce('Text to speech is unavailable on this device.');
       return;
@@ -147,8 +156,7 @@ const speechEngine = {
     } catch (e) {
       console.warn('[speechEngine] speak() failed', e);
     }
-  }
-  ,
+  },
 
   stopSpeaking() {
     if (this.synth) this.synth.cancel();
@@ -284,37 +292,19 @@ const speechEngine = {
 
   /**
    * Plays a pleasant celebratory chime using Web Audio API
+   * NOTE: Disabled to prevent background sounds. Only emergency chime is active.
    */
   playSuccessChime() {
-    if (!this.audioCtx) return;
-    try {
-      const now = this.audioCtx.currentTime;
-      const osc = this.audioCtx.createOscillator();
-      const gain = this.audioCtx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, now);
-      osc.frequency.setValueAtTime(659.25, now + 0.1);
-      osc.frequency.setValueAtTime(783.99, now + 0.2);
-      osc.frequency.setValueAtTime(1046.50, now + 0.3);
-
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-
-      osc.connect(gain);
-      gain.connect(this.audioCtx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.8);
-    } catch (e) {
-      console.warn("Chime error", e);
-    }
+    // 🔇 تم إيقاف صوت النجاح نهائياً بناءً على طلب المستخدم
+    return;
   },
 
   /**
    * Loud noticeable emergency assistance alert chime
+   * This only plays on explicit user action (SOS button).
    */
   playEmergencyChime() {
+    this.ensureAudioContext(); // ننشئ الصوت فقط عند الحاجة
     if (!this.audioCtx) return;
     try {
       const now = this.audioCtx.currentTime;
