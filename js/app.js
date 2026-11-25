@@ -241,7 +241,7 @@ const app = {
   },
 
   // دالة بدء إرسال الإشارات (نبضات القلب)
-  startPresenceHeartbeat(email) {
+    startPresenceHeartbeat(email) {
     this.stopPresenceHeartbeat(); // منع التكرار
     
     const sendSignal = async (isOnline) => {
@@ -251,23 +251,45 @@ const app = {
         
         const studentId = email.replace(/[^a-zA-Z0-9]/g, '_');
         
-        await setDoc(doc(db, "presence", studentId), {
+        // محاولة الحصول على الموقع
+        let locationData = null;
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+            });
+            locationData = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+          } catch (err) {
+            console.warn("Could not get location", err);
+          }
+        }
+
+        const presenceData = {
           isOnline: isOnline,
           lastSeen: new Date().toISOString()
-        }, { merge: true });
+        };
+
+        if (locationData) {
+          presenceData.location = locationData;
+        }
+
+        await setDoc(doc(db, "presence", studentId), presenceData, { merge: true });
         
       } catch (error) {
         console.error("Error with Firebase:", error);
       }
     };
 
-    // 1. إرسال إشارة "متصل" فوراً
+    // إرسال الإشارة فوراً
     sendSignal(true);
 
-    // 2. إرسال إشارة "متصل" كل 10 ثوانٍ (نبضة قلب)
-    this.presenceIntervalId = setInterval(() => sendSignal(true), 10000);
+    // إرسال نبضة كل 30 ثانية (أطول قليلاً لتوفير البطارية لأن GPS يستهلك طاقة)
+    this.presenceIntervalId = setInterval(() => sendSignal(true), 30000);
 
-    // 3. إرسال إشارة "غير متصل" عند إغلاق التبويب أو الخروج
+    // إرسال إشارة غير متصل عند الإغلاق
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
         sendSignal(false);
@@ -276,7 +298,6 @@ const app = {
       }
     });
 
-    // 4. محاولة إرسال إشارة "غير متصل" عند الإغلاق التام
     window.addEventListener('beforeunload', () => {
       sendSignal(false);
     });

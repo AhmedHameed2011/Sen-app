@@ -1,13 +1,15 @@
-import { db, messaging, getToken, onMessage } from './firebase-config.js';
-import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { db } from './firebase-config.js';
+import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// ⚠️ ضع مفتاح VAPID هنا (من Firebase Console -> Cloud Messaging)
-const VAPID_KEY = "BIv8-VJ7jMy6uhHg-UsLfFDhymJo8Nc8Q4HWKtYfWZa9JVWAT-F5vuVLgrUBRG-G03hTMQsziBobrFvkLgs-7NU";
+let unsubscribe = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnCheck = document.getElementById('btnCheck');
   const btnEnable = document.getElementById('btn-enable-notifications');
   
+  // ==========================================
+  // 1. زر متابعة حالة الطالب
+  // ==========================================
   if (btnCheck) {
     btnCheck.addEventListener('click', () => {
       const email = document.getElementById('parentEmail').value.trim().toLowerCase();
@@ -22,25 +24,42 @@ document.addEventListener('DOMContentLoaded', () => {
       statusCard.style.display = 'block';
       statusText.textContent = 'جاري التحقق...';
       
-      if (window.unsubscribe) window.unsubscribe();
+      if (unsubscribe) unsubscribe();
 
       try {
         const docRef = doc(db, "presence", studentId);
         
-        window.unsubscribe = onSnapshot(docRef, (docSnap) => {
+        unsubscribe = onSnapshot(docRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             const lastSeenTime = new Date(data.lastSeen).getTime();
             const now = new Date().getTime();
             const diffInSeconds = (now - lastSeenTime) / 1000;
             
+            // تحديد حالة الاتصال
+            let isOnline = false;
             if (data.isOnline && diffInSeconds < 30) {
+              isOnline = true;
+            }
+
+            // تحديد حالة الموقع
+            let locationText = '';
+            if (data.locationStatus === 'school') {
+              locationText = ' | 🏫 في المدرسة';
+            } else if (data.locationStatus === 'home') {
+              locationText = ' | 🏠 في المنزل';
+            } else if (data.locationStatus === 'outside') {
+              locationText = ' | 🚶 خارج النطاق';
+            }
+
+            // تحديث واجهة المستخدم
+            if (isOnline) {
               statusCard.className = 'status-online';
-              statusText.innerHTML = '🟢 الطالب يستخدم التطبيق الآن';
+              statusText.innerHTML = `🟢 الطالب يستخدم التطبيق الآن${locationText}`;
               timeText.textContent = `آخر تحديث: ${new Date(data.lastSeen).toLocaleTimeString('ar-SA')}`;
             } else {
               statusCard.className = 'status-offline';
-              statusText.innerHTML = '🔴 الطالب غير متصل';
+              statusText.innerHTML = `🔴 الطالب غير متصل${locationText}`;
               timeText.textContent = `آخر ظهور: ${new Date(data.lastSeen).toLocaleString('ar-SA')}`;
             }
           } else {
@@ -59,21 +78,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // تفعيل الإشعارات
+  // ==========================================
+  // 2. زر تفعيل الإشعارات
+  // ==========================================
   if (btnEnable) {
     btnEnable.addEventListener('click', async () => {
       try {
+        // التحقق من دعم المتصفح
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+          alert('متصفحك لا يدعم الإشعارات. يرجى استخدام Chrome أو Edge أو Safari (مع إضافة التطبيق للشاشة الرئيسية).');
+          return;
+        }
+
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
+          // استيراد الدوال من firebase-config.js
+          const { getToken, messaging } = await import('./firebase-config.js');
+          
+          // ⚠️ يجب أن يكون مفتاح VAPID موجوداً في firebase-config.js أو هنا
+          const VAPID_KEY = "BIv8-VJ7jMy6uhHg-UsLfFDhymJo8Nc8Q4HWKtYfWZa9JVWAT-F5vuVLgrUBRG-G03hTMQsziBobrFvkLgs-7NU"; // استبدل هذا بمفتاحك الحقيقي
+
           const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+          
           if (token) {
             const email = document.getElementById('parentEmail').value.trim().toLowerCase();
             if (email) {
               const parentId = email.replace(/[^a-zA-Z0-9]/g, '_');
+              // استيراد setDoc من Firestore
+              const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+              
               await setDoc(doc(db, "parent_tokens", parentId), {
                 fcmToken: token,
                 updatedAt: new Date().toISOString()
               }, { merge: true });
+              
               alert('✅ تم تفعيل الإشعارات بنجاح!');
             } else {
               alert('الرجاء إدخال البريد الإلكتروني أولاً.');
@@ -84,14 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('حدث خطأ أثناء تفعيل الإشعارات.');
+        alert('حدث خطأ أثناء تفعيل الإشعارات. تأكد من أن التطبيق مثبت على الشاشة الرئيسية (للآيفون).');
       }
     });
   }
-});
-
-// استقبال الإشعارات عندما يكون التطبيق مفتوحاً
-onMessage(messaging, (payload) => {
-  console.log('Message received: ', payload);
-  alert(`${payload.notification.title}: ${payload.notification.body}`);
 });
