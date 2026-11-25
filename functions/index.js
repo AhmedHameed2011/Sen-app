@@ -3,13 +3,14 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 exports.sendParentNotification = onDocumentUpdated("presence/{studentId}", async (event) => {
-  const eventId = event.id;
+  const eventId = event.id; // معرف فريد لكل حدث
   const db = admin.firestore();
   
-  // 🔍 فحص التكرار لمنع الإشعارات المكررة لنفس الحدث
+  // 🔍 1. فحص التكرار: هل تمت معالجة هذا الحدث من قبل؟
   const processedRef = db.collection('processedEvents').doc(eventId);
   const processedDoc = await processedRef.get();
   if (processedDoc.exists) {
+    console.log('Event already processed, skipping:', eventId);
     return null; // تجاهل الحدث المكرر
   }
 
@@ -27,25 +28,24 @@ exports.sendParentNotification = onDocumentUpdated("presence/{studentId}", async
 
   const studentId = event.params.studentId;
   
-  // 🔍 التحقق من وجود ولي أمر مرتبط فعلاً
+  // 🔍 2. التحقق من وجود ولي أمر مرتبط
   const parentDoc = await db.collection('parent_tokens').doc(studentId).get();
   if (!parentDoc.exists) {
     console.log('No parent linked for student:', studentId);
-    return null; // لا يوجد ولي أمر مرتبط، لا ترسل إشعاراً
+    return null; 
   }
-
   const fcmToken = parentDoc.data().fcmToken;
   if (!fcmToken) return null;
 
+  // 3. تحديد نوع الإشعار
   let notificationBody = '';
   if (!wasOnline && isNowOnline) {
     notificationBody = 'الطالب فتح التطبيق الآن! 🟢';
   } else if (wasOnline && !isNowOnline) {
     notificationBody = 'الطالب أغلق التطبيق الآن! 🔴';
-  } else {
-    return null;
   }
 
+  // 4. إرسال الإشعار
   const payload = {
     notification: {
       title: 'سند | تنبيه النشاط',
@@ -58,7 +58,7 @@ exports.sendParentNotification = onDocumentUpdated("presence/{studentId}", async
     await admin.messaging().send(payload);
     console.log(`Notification sent: ${notificationBody}`);
     
-    // ✅ تسجيل الحدث كـ "تمت معالجته"
+    // 5. تسجيل الحدث لمنع التكرار
     await processedRef.set({ 
       processedAt: admin.firestore.FieldValue.serverTimestamp(),
       studentId: studentId
