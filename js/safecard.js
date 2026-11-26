@@ -100,7 +100,13 @@ const safecardModule = {
     }
 
     if (motherCardEl) {
-      const mName = this.profile.mother_name || (isAr ? "فاطمة الزهراء" : "Um Zayed");
+// تحديد اسم الأم بناءً على اللغة
+let mName = this.profile.mother_name;
+if (!isAr && mName === "أم زايد") {
+  mName = "Umm Zayed"; // الترجمة الإنجليزية لاسم أم زايد
+} else if (!mName) {
+  mName = isAr ? "أم زايد" : "Umm Zayed";
+}
       const mPhone = this.profile.mother_phone || "+971501234567";
       motherCardEl.setAttribute('href', `tel:${mPhone}`);
       motherCardEl.setAttribute('aria-label', `${motherRole}: ${mName}, ${callText}`);
@@ -211,7 +217,7 @@ const safecardModule = {
 
         this.profile = {
           name: isAr ? "زيد المنصوري" : "Zaid Al-Mansouri",
-          school: isAr ? "أكاديمية النور | الصف الخامس" : "Al Noor Academy | Grade 5",
+          school: isAr ? "مدرسة الظاهر للشراكات التعليمية | الصف السادس" : "Al Dhaher School for Educational Partnerships | Grade 6",
           father_name: isAr ? "طارق المنصوري" : "Tariq Al-Mansouri",
           father_phone: "+971509876543",
           mother_name: isAr ? "ام زايد" : " Um zayed",
