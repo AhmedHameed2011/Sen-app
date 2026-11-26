@@ -102,11 +102,20 @@ const safecardModule = {
     if (motherCardEl) {
 // تحديد اسم الأم بناءً على اللغة
 let mName = this.profile.mother_name;
-if (!isAr && mName === "أم زايد") {
-  mName = "Umm Zayed"; // الترجمة الإنجليزية لاسم أم زايد
-} else if (!mName) {
+
+// التحقق من كلا الكتابتين (مع الهمزة وبدونها)
+if (!isAr && (mName === "أم زايد" || mName === "ام زايد")) {
+  mName = "Umm Zayed";
+} 
+// إذا كانت اللغة عربية والاسم بالإنجليزية، نعرض العربي
+else if (isAr && mName === "Umm Zayed") {
+  mName = "أم زايد";
+}
+// إذا كان الحقل فارغاً
+else if (!mName) {
   mName = isAr ? "أم زايد" : "Umm Zayed";
 }
+
       const mPhone = this.profile.mother_phone || "+971501234567";
       motherCardEl.setAttribute('href', `tel:${mPhone}`);
       motherCardEl.setAttribute('aria-label', `${motherRole}: ${mName}, ${callText}`);
