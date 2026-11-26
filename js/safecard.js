@@ -8,10 +8,10 @@
 const safecardModule = {
   profile: {
     name: "زيد المنصوري",
-    school: "أكاديمية النور | الصف الخامس",
+    school: "مدرسة الظاهر للشراكات التعليمية | الصف السادس",
     father_name: "طارق المنصوري",
     father_phone: "+971500000000",
-    mother_name: "فاطمة",
+    mother_name: "ام زايد",
     mother_phone: "+971500000000",
     help: "• أتواصل بشكل أفضل باستخدام البطاقات البصرية أو الجمل القصيرة والهادئة.\n• الأصوات العالية أو الزحام المفاجئ قد يسبب لي توتراً حسياً. أرجو إعطائي دقيقتين في مكان هادئ.\n• إذا كنت تائهاً، أرجو مساعدتي بالاتصال بوالديّ فوراً على الأرقام أدناه.",
     medical: "حساسية: الفول السوداني. يستخدم سماعات عازلة للضوضاء في البيئات الصاخبة."
@@ -37,7 +37,7 @@ const safecardModule = {
           parsed.mother_phone = parsed.contact1_phone;
           parsed.mother_name = parsed.contact1_name
             ? parsed.contact1_name.replace(/Mother:?\s*/i, '').replace(/الأم:?\s*/i, '')
-            : "فاطمة الزهراء";
+            : "ام زايد";
         }
         if (parsed.contact2_phone && !parsed.father_phone) {
           parsed.father_phone = parsed.contact2_phone;
@@ -70,7 +70,7 @@ const safecardModule = {
     const motherCardEl = document.getElementById('safecard-mother-display');
 
     if (nameEl) nameEl.textContent = this.profile.name || (isAr ? "زيد المنصوري" : "Zaid Al-Mansouri");
-    if (schoolEl) schoolEl.textContent = this.profile.school || (isAr ? "أكاديمية النور | الصف الخامس" : "Al Noor Academy | Grade 5");
+    if (schoolEl) schoolEl.textContent = this.profile.school || (isAr ? "مدرسة الظاهر للشراكات التعليمية | الصف السادس" : "Al Dhaher School for Educational Partnerships | Grade 6");
     if (helpEl) helpEl.innerHTML = (this.profile.help || "").replace(/\n/g, '<br>');
     if (medEl) medEl.textContent = this.profile.medical || "";
 
@@ -100,7 +100,7 @@ const safecardModule = {
     }
 
     if (motherCardEl) {
-      const mName = this.profile.mother_name || (isAr ? "فاطمة الزهراء" : "Fatima Al-Zahra");
+      const mName = this.profile.mother_name || (isAr ? "فاطمة الزهراء" : "Um Zayed");
       const mPhone = this.profile.mother_phone || "+971501234567";
       motherCardEl.setAttribute('href', `tel:${mPhone}`);
       motherCardEl.setAttribute('aria-label', `${motherRole}: ${mName}, ${callText}`);
@@ -214,7 +214,7 @@ const safecardModule = {
           school: isAr ? "أكاديمية النور | الصف الخامس" : "Al Noor Academy | Grade 5",
           father_name: isAr ? "طارق المنصوري" : "Tariq Al-Mansouri",
           father_phone: "+971509876543",
-          mother_name: isAr ? "فاطمة الزهراء" : "Fatima Al-Zahra",
+          mother_name: isAr ? "ام زايد" : " Um zayed",
           mother_phone: "+971501234567",
           help: "",
           medical: ""
